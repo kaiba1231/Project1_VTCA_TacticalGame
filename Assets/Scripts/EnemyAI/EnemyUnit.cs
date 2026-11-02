@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(UnitTurnComponent))]
@@ -7,7 +9,7 @@ public class EnemyUnit : MonoBehaviour
     [SerializeField] private int maxAP = 2;
     [SerializeField] private int currentAP;
 
-    [Header("Runtime - TurnManager tu gan")]
+    [Header("ID - khong duoc trung")]
     [SerializeField] private int enemyId = -1;
 
     private TurnManager turnManager;
@@ -17,6 +19,12 @@ public class EnemyUnit : MonoBehaviour
     public int MaxAP => maxAP;
     public int CurrentAP => currentAP;
     public bool HasEndedTurn => unitTurn.HasEndedTurn;
+
+
+
+    // ---------------------- Phuong thuc functions ------------------------ //
+
+
 
     private void Awake()
     {

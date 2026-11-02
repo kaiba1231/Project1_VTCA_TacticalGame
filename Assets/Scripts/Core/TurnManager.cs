@@ -18,7 +18,6 @@ public class TurnManager : MonoBehaviour
     [SerializeField] private List<EnemyUnit> enemyUnits = new List<EnemyUnit>();
 
     [Header("Settings")]
-    [SerializeField] private bool randomEnemyIds = true;
     [SerializeField] private float enemyPreviewSeconds = 1f;
     [SerializeField] private bool showDebugLogs = true;
 
@@ -42,47 +41,60 @@ public class TurnManager : MonoBehaviour
 
     private void InitializeUnits()
     {
-        // Neu bo trong Inspector, tu tim cac unit dang active trong scene.
-        if (playerUnits.Count == 0)
-        {
-            playerUnits.AddRange(FindObjectsByType<PlayerUnit>(FindObjectsSortMode.None));
-            playerUnits.Sort((a, b) => string.CompareOrdinal(a.name, b.name));
-        }
+        InitializePlayers();
+        InitializeEnemies();
+    }
 
-        if (enemyUnits.Count == 0)
-            enemyUnits.AddRange(FindObjectsByType<EnemyUnit>(FindObjectsSortMode.None));
-
-        playerUnits.RemoveAll(unit => unit == null);
-        enemyUnits.RemoveAll(unit => unit == null);
-
-        // Player ID theo danh sach Inspector (hoac theo ten neu tu tim).
+    private void InitializePlayers()
+    {
         for (int i = 0; i < playerUnits.Count; i++)
         {
             playerUnits[i].SetPlayerId(i);
             playerUnits[i].SetTurnManager(this);
             playerUnits[i].SetActiveUnit(false);
-            Log("ASSIGN PlayerId=" + i + " -> " + playerUnits[i].name);
-        }
-
-        // Xao tron Enemy mot lan khi bat dau, sau do danh ID 0,1,2...
-        if (randomEnemyIds)
-        {
-            for (int i = enemyUnits.Count - 1; i > 0; i--)
-            {
-                int j = Random.Range(0, i + 1);
-                EnemyUnit temp = enemyUnits[i];
-                enemyUnits[i] = enemyUnits[j];
-                enemyUnits[j] = temp;
-            }
-        }
-
-        for (int i = 0; i < enemyUnits.Count; i++)
-        {
-            enemyUnits[i].SetEnemyId(i);
-            enemyUnits[i].SetTurnManager(this);
-            Log("ASSIGN EnemyId=" + i + " -> " + enemyUnits[i].name);
         }
     }
+
+    private void InitializeEnemies()
+    {
+        // ****** LUU Y PHAI KIEM TRA LAI ENEMY TRONG SCENE XEM ENEMY NAO CO BI TRUNG ID HAY KHONG *********//
+        enemyUnits.RemoveAll(enemy => enemy == null);
+
+        // Kiem tra Enemy ID bi trung.
+        List<int> usedIds = new List<int>();
+
+        foreach (EnemyUnit enemy in enemyUnits)
+        {
+            int id = enemy.EnemyId;
+
+            if (id < 0 || usedIds.Contains(id))
+            {
+                Debug.LogError("Enemy ID khong hop le hoac bi trung: " + enemy.name, enemy);
+
+                return;
+            }
+
+            usedIds.Add(id);
+
+        }
+
+        // Sort Enemy theo ID da gan trong Inspector.
+        enemyUnits.Sort((a, b) =>
+            a.EnemyId.CompareTo(b.EnemyId));
+
+        foreach (EnemyUnit enemy in enemyUnits)
+        {
+            enemy.SetTurnManager(this);
+
+            Log($"EnemyId={enemy.EnemyId} -> {enemy.name}");
+        }
+    }
+
+
+
+
+    // ------------- function cua player --------------------- //
+
 
     private void StartPlayerTurn()
     {
@@ -93,8 +105,9 @@ public class TurnManager : MonoBehaviour
         Log("===== ROUND " + RoundNumber + " | PLAYER TURN =====");
 
         foreach (PlayerUnit player in playerUnits)
+        {
             player.BeginTurn();
-
+        }
         SelectFirstAvailablePlayer();
     }
 
@@ -102,7 +115,7 @@ public class TurnManager : MonoBehaviour
     public void SelectPlayer(PlayerUnit player)
     {
         if (CurrentPhase != BattlePhase.PlayerTurn) return;
-        if (player == null || !player.CanAct || !playerUnits.Contains(player)) return;
+        if (player == null || !player.CanAct) return;
         if (SelectedPlayer == player) return;
 
         SetSelectedPlayer(player);
@@ -110,8 +123,7 @@ public class TurnManager : MonoBehaviour
 
     private void SetSelectedPlayer(PlayerUnit player)
     {
-        if (SelectedPlayer != null)
-            SelectedPlayer.SetActiveUnit(false);
+        if (SelectedPlayer != null) SelectedPlayer.SetActiveUnit(false);
 
         SelectedPlayer = player;
 
@@ -166,6 +178,8 @@ public class TurnManager : MonoBehaviour
         return false;
     }
 
+
+    // ------------- function cua enemy --------------------- //
     private void StartEnemyTurn()
     {
         SetSelectedPlayer(null);
@@ -181,7 +195,7 @@ public class TurnManager : MonoBehaviour
         {
             CurrentEnemy = enemy;
             enemy.BeginTurn();
-            Log("ACTIVE Enemy[" + enemy.EnemyId + "] " + enemy.name);
+            Log("ACTIVE Enemy dang la [" + enemy.EnemyId + "] " + enemy.name);
 
             yield return new WaitForSeconds(Mathf.Max(0.1f, enemyPreviewSeconds));
 

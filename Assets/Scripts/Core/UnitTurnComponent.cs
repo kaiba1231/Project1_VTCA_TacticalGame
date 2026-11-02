@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 // Giu trang thai luot cua tung Player/Enemy.
@@ -6,7 +8,7 @@ public class UnitTurnComponent : MonoBehaviour
 {
     [SerializeField] private bool hasEndedTurn = true;
 
-    public bool HasEndedTurn => hasEndedTurn;
+    public bool HasEndedTurn => hasEndedTurn; // cac script khac kiem tra trang thai hasendturn cua unit
 
     public void BeginTurn()
     {
