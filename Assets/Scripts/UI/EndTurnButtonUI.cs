@@ -1,13 +1,16 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// Gan len chinh GameObject Button "EndTurnButton" trong Canvas.
 [RequireComponent(typeof(Button))]
 public class EndTurnButtonUI : MonoBehaviour
 {
     [SerializeField] private TurnManager turnManager;
 
     private Button button;
+
+
+    // ---------------------- Phuong thuc functions ------------------------ //
+
 
     private void Awake()
     {
@@ -17,7 +20,7 @@ public class EndTurnButtonUI : MonoBehaviour
     private void Start()
     {
         if (turnManager == null)
-            turnManager = FindFirstObjectByType<TurnManager>();
+            turnManager = FindAnyObjectByType<TurnManager>();
 
         button.onClick.AddListener(OnEndTurnClicked);
     }

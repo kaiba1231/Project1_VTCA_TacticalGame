@@ -8,7 +8,7 @@ public class PlayerUnit : MonoBehaviour
     [SerializeField] private int maxAP = 2;
     [SerializeField] private int currentAP;
 
-    [Header("Runtime - TurnManager tu gan")]
+    [Header("ID - Khong duoc trung")]
     [SerializeField] private int playerId = -1;
     [SerializeField] private bool isActiveUnit;
 
@@ -21,6 +21,12 @@ public class PlayerUnit : MonoBehaviour
     public bool IsActiveUnit => isActiveUnit;
     public bool HasEndedTurn => unitTurn.HasEndedTurn;
     public bool CanAct => !HasEndedTurn && currentAP > 0;
+
+
+
+    // ---------------------- Phuong thuc functions ------------------------ //
+
+
 
     private void Awake()
     {
