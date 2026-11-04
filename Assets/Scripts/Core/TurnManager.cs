@@ -114,8 +114,16 @@ public class TurnManager : MonoBehaviour
     // PlayerUnit goi khi nguoi choi click len Collider2D.
     public void SelectPlayer(PlayerUnit player)
     {
+        if (SelectedPlayer != null)  // Không cho đổi Player khi unit hiện tại đang di chuyển
+        {
+            MoveActionComponent unitMove = SelectedPlayer.GetComponent<MoveActionComponent>();
+
+            if (unitMove != null && unitMove.IsMoving)
+                return;
+        }
+
         if (CurrentPhase != BattlePhase.PlayerTurn) return;
-        if (player == null || !player.CanAct) return;
+        if (player == null || !player.CanAct || !playerUnits.Contains(player)) return;
         if (SelectedPlayer == player) return;
 
         SetSelectedPlayer(player);
@@ -137,15 +145,13 @@ public class TurnManager : MonoBehaviour
     // Button UI chi can goi ham nay.
     public void EndSelectedPlayerTurn()
     {
-        if (CurrentPhase != BattlePhase.PlayerTurn)
-        {
-            Log("Khong the End Turn: hien tai la " + CurrentPhase);
+        if (CurrentPhase != BattlePhase.PlayerTurn || SelectedPlayer == null)
             return;
-        }
 
-        if (SelectedPlayer == null)
+        MoveActionComponent unitMove = SelectedPlayer.GetComponent<MoveActionComponent>(); // bo sung de ngan khong cho end turn khi unit dang di chuyen
+        if (unitMove != null && unitMove.IsMoving)
         {
-            Log("Khong co Player nao dang duoc chon.");
+            Debug.Log("[TURN] Cannot End Turn khi unit is moving!");
             return;
         }
 
