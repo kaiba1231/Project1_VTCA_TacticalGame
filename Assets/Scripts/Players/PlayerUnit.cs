@@ -12,6 +12,7 @@ public class PlayerUnit : MonoBehaviour
     [SerializeField] private int playerId = -1;
     [SerializeField] private bool isActiveUnit;
 
+
     private TurnManager turnManager;
     private UnitTurnComponent unitTurn;
 
@@ -33,14 +34,15 @@ public class PlayerUnit : MonoBehaviour
         unitTurn = GetComponent<UnitTurnComponent>();
     }
 
-    public void SetTurnManager(TurnManager manager)
-    {
-        turnManager = manager;
-    }
 
     public void SetPlayerId(int id)
     {
         playerId = id;
+    }
+
+    public void SetTurnManager(TurnManager manager)
+    {
+        turnManager = manager;
     }
 
     public void SetActiveUnit(bool active)
@@ -71,7 +73,7 @@ public class PlayerUnit : MonoBehaviour
         if (turnManager == null || turnManager.CurrentPhase != BattlePhase.PlayerTurn) return false;
 
         currentAP -= amount;
-        turnManager.Log("Player[" + playerId + "] spent " + amount + " AP | Left: " + currentAP);
+        turnManager.Log("Player[" + playerId + "] spent " + amount + " AP | AP remaining: " + currentAP);
 
         if (currentAP == 0)
             EndTurn();

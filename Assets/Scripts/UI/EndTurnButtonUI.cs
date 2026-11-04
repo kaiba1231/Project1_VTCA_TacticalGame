@@ -6,29 +6,25 @@ public class EndTurnButtonUI : MonoBehaviour
 {
     [SerializeField] private TurnManager turnManager;
 
-    private Button button;
+    [SerializeField] private Button endTurnButton;
 
 
     // ---------------------- Phuong thuc functions ------------------------ //
 
 
-    private void Awake()
-    {
-        button = GetComponent<Button>();
-    }
-
-    private void Start()
+    void Awake()
     {
         if (turnManager == null)
             turnManager = FindAnyObjectByType<TurnManager>();
 
-        button.onClick.AddListener(OnEndTurnClicked);
+        if (endTurnButton != null)
+            endTurnButton.onClick.AddListener(OnEndTurnClicked);
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
-        if (button != null)
-            button.onClick.RemoveListener(OnEndTurnClicked);
+        if (endTurnButton != null)
+            endTurnButton.onClick.RemoveListener(OnEndTurnClicked);
     }
 
     private void OnEndTurnClicked()
@@ -37,5 +33,25 @@ public class EndTurnButtonUI : MonoBehaviour
 
         if (turnManager != null)
             turnManager.EndSelectedPlayerTurn();
+    }
+
+    void Update()
+    {
+        if (turnManager == null || endTurnButton == null)
+            return;
+
+        bool isPlayerTurn = turnManager.CurrentPhase == BattlePhase.PlayerTurn;
+
+        PlayerUnit player = turnManager.SelectedPlayer;
+
+        if (!isPlayerTurn || player == null || !player.CanAct)
+        {
+            endTurnButton.interactable = false;
+            return;
+        }
+
+        MoveActionComponent move = player.GetComponent<MoveActionComponent>();
+
+        endTurnButton.interactable = move == null || !move.IsMoving;
     }
 }
