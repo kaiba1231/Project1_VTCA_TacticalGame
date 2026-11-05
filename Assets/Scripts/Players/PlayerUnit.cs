@@ -12,7 +12,6 @@ public class PlayerUnit : MonoBehaviour
     [SerializeField] private int playerId = -1;
     [SerializeField] private bool isActiveUnit;
 
-
     private TurnManager turnManager;
     private UnitTurnComponent unitTurn;
 
@@ -48,6 +47,7 @@ public class PlayerUnit : MonoBehaviour
     public void SetActiveUnit(bool active)
     {
         isActiveUnit = active;
+
     }
 
     public void BeginTurn()
@@ -75,16 +75,14 @@ public class PlayerUnit : MonoBehaviour
         currentAP -= amount;
         turnManager.Log("Player[" + playerId + "] spent " + amount + " AP | AP remaining: " + currentAP);
 
-        if (currentAP == 0)
-            EndTurn();
-
+        if (currentAP == 0) EndTurn();
         return true;
     }
 
     // Unity goi khi click vao Collider2D cua Player.
     private void OnMouseDown()
     {
-        if (turnManager != null)
+        if (turnManager != null && !isActiveUnit && CanAct)
             turnManager.SelectPlayer(this);
     }
 
