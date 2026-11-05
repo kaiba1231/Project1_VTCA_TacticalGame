@@ -6,7 +6,7 @@ using TMPro;
 public class UnitHealthBarUI : MonoBehaviour
 {
     [SerializeField] private Image hpFill;
-    [SerializeField] private TMP_Text percentText;
+    [SerializeField] private TMP_Text HPText;
 
     private PlayerHealthComponent playerHealth;
     private EnemyHealthComponent enemyHealth;
@@ -20,16 +20,29 @@ public class UnitHealthBarUI : MonoBehaviour
     private void Update()
     {
         float percent = 0f;
+        int currentHP = 0;
+        int maxHP = 0;
 
-        if (playerHealth != null)
+        if (playerHealth != null) // cho player
+        {
             percent = playerHealth.HealthPercent;
-        else if (enemyHealth != null)
+            currentHP = playerHealth.CurrentHealth;
+            maxHP = playerHealth.MaxHealth;
+        }
+        else if (enemyHealth != null) // cho enemy
+        {
             percent = enemyHealth.HealthPercent;
-
+            currentHP = enemyHealth.CurrentHealth;
+            maxHP = enemyHealth.MaxHealth;
+        }
         if (hpFill != null)
+        {
             hpFill.fillAmount = percent;
+        }
 
-        if (percentText != null)
-            percentText.text = Mathf.RoundToInt(percent * 100f) + "%";
+        if (HPText != null)
+        {
+            HPText.text = currentHP.ToString();
+        }
     }
 }
