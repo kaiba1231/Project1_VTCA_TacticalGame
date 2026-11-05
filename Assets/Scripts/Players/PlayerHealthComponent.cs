@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerHealthComponent : MonoBehaviour
 {
     [SerializeField, Min(1)] private int maxHealth = 100;
-    [SerializeField] private int currentHealth;
+    private int currentHealth;
 
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
@@ -12,10 +12,10 @@ public class PlayerHealthComponent : MonoBehaviour
 
     private void Awake()
     {
-        ResetHealth();
+        ResetMaxHealth();
     }
 
-    public void ResetHealth()
+    public void ResetMaxHealth()
     {
         currentHealth = maxHealth;
     }
@@ -34,17 +34,5 @@ public class PlayerHealthComponent : MonoBehaviour
 
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         Debug.Log("[HP] Player " + name + ": " + currentHealth + "/" + maxHealth);
-    }
-
-    [ContextMenu("DEBUG: Take 20 Damage")]
-    private void DebugTakeDamage()
-    {
-        if (Application.isPlaying) TakeDamage(20);
-    }
-
-    [ContextMenu("DEBUG: Heal 20 HP")]
-    private void DebugHeal()
-    {
-        if (Application.isPlaying) Heal(20);
     }
 }
