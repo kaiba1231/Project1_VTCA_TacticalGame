@@ -2,22 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(UnitTurnComponent))]
+[RequireComponent(typeof(UnitTurnComponent), typeof(APComponent))]
 public class EnemyUnit : MonoBehaviour
 {
-    [Header("AP")]
-    [SerializeField] private int maxAP = 2;
-    [SerializeField] private int currentAP;
-
     [Header("ID - khong duoc trung")]
     [SerializeField] private int enemyId = -1;
 
     private TurnManager turnManager;
     private UnitTurnComponent unitTurn;
+    private APComponent ap;
 
     public int EnemyId => enemyId;
-    public int MaxAP => maxAP;
-    public int CurrentAP => currentAP;
+    public int MaxAP => ap.MaxAP;
+    public int CurrentAP => ap.CurrentAP;
     public bool HasEndedTurn => unitTurn.HasEndedTurn;
 
 
@@ -29,6 +26,7 @@ public class EnemyUnit : MonoBehaviour
     private void Awake()
     {
         unitTurn = GetComponent<UnitTurnComponent>();
+        ap = GetComponent<APComponent>();
     }
 
     public void SetTurnManager(TurnManager manager)
@@ -43,9 +41,9 @@ public class EnemyUnit : MonoBehaviour
 
     public void BeginTurn()
     {
-        currentAP = maxAP;
+        ap.ResetAP();
         unitTurn.BeginTurn();
-        turnManager.Log("Enemy[" + enemyId + "] START | AP: " + currentAP);
+        turnManager.Log("Enemy[" + enemyId + "] START | AP: " + ap.CurrentAP);
     }
 
     public void EndTurn()
@@ -59,13 +57,13 @@ public class EnemyUnit : MonoBehaviour
     // Enemy AI se su dung sau nay. Hien tai Enemy dang duoc mo phong.
     public bool TrySpendAP(int amount = 1)
     {
-        if (amount <= 0 || HasEndedTurn || currentAP < amount) return false;
+        if (amount <= 0 || HasEndedTurn || !ap.HasEnoughAP(amount)) return false;
         if (turnManager == null || turnManager.CurrentEnemy != this) return false;
 
-        currentAP -= amount;
-        turnManager.Log("Enemy[" + enemyId + "] spent " + amount + " AP | Left: " + currentAP);
+        if (!ap.TrySpendAP(amount)) return false;
+        turnManager.Log("Enemy[" + enemyId + "] spent " + amount + " AP | Left: " + ap.CurrentAP);
 
-        if (currentAP == 0)
+        if (ap.CurrentAP == 0)
             EndTurn();
 
         return true;

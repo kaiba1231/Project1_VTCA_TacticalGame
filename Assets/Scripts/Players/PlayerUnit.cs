@@ -1,26 +1,23 @@
 using UnityEngine;
 
 // Gan len root Player co Collider2D.
-[RequireComponent(typeof(UnitTurnComponent))]
+[RequireComponent(typeof(UnitTurnComponent), typeof(APComponent))]
 public class PlayerUnit : MonoBehaviour
 {
-    [Header("AP")]
-    [SerializeField] private int maxAP = 2;
-    [SerializeField] private int currentAP;
-
     [Header("ID - Khong duoc trung")]
     [SerializeField] private int playerId = -1;
     [SerializeField] private bool isActiveUnit;
 
     private TurnManager turnManager;
     private UnitTurnComponent unitTurn;
+    private APComponent ap;
 
     public int PlayerId => playerId;
-    public int MaxAP => maxAP;
-    public int CurrentAP => currentAP;
+    public int MaxAP => ap.MaxAP;
+    public int CurrentAP => ap.CurrentAP;
     public bool IsActiveUnit => isActiveUnit;
     public bool HasEndedTurn => unitTurn.HasEndedTurn;
-    public bool CanAct => !HasEndedTurn && currentAP > 0;
+    public bool CanAct => !HasEndedTurn && ap.CurrentAP > 0;
 
 
 
@@ -31,6 +28,7 @@ public class PlayerUnit : MonoBehaviour
     private void Awake()
     {
         unitTurn = GetComponent<UnitTurnComponent>();
+        ap = GetComponent<APComponent>();
     }
 
 
@@ -52,9 +50,9 @@ public class PlayerUnit : MonoBehaviour
 
     public void BeginTurn()
     {
-        currentAP = maxAP;
+        ap.ResetAP();
         unitTurn.BeginTurn();
-        turnManager.Log("Player[" + playerId + "] START | AP: " + currentAP);
+        turnManager.Log("Player[" + playerId + "] START | AP: " + ap.CurrentAP);
     }
 
     public void EndTurn()
@@ -62,20 +60,20 @@ public class PlayerUnit : MonoBehaviour
         if (HasEndedTurn || turnManager == null || !isActiveUnit) return;
 
         unitTurn.EndTurn();
-        turnManager.Log("Player[" + playerId + "] END TURN | AP left: " + currentAP);
+        turnManager.Log("Player[" + playerId + "] END TURN | AP left: " + ap.CurrentAP);
         turnManager.OnPlayerEnded(this);
     }
 
     // De Move / Shoot su dung sau nay. Chua can goi o bai nay.
     public bool TrySpendAP(int amount = 1)
     {
-        if (amount <= 0 || currentAP < amount || !CanAct || !isActiveUnit) return false;
+        if (amount <= 0 || !ap.HasEnoughAP(amount) || !CanAct || !isActiveUnit) return false;
         if (turnManager == null || turnManager.CurrentPhase != BattlePhase.PlayerTurn) return false;
 
-        currentAP -= amount;
-        turnManager.Log("Player[" + playerId + "] spent " + amount + " AP | AP remaining: " + currentAP);
+        if (!ap.TrySpendAP(amount)) return false;
+        turnManager.Log("Player[" + playerId + "] spent " + amount + " AP | AP remaining: " + ap.CurrentAP);
 
-        if (currentAP == 0) EndTurn();
+        if (ap.CurrentAP == 0) EndTurn();
         return true;
     }
 
