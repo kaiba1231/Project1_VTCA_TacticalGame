@@ -20,31 +20,21 @@ public class EnemyHealthComponent : MonoBehaviour
         currentHealth = maxHealth;
     }
 
-    public void TakeDamage(int amount)
+    public int TakeDamage(int amount)
     {
-        if (amount <= 0) return;
+        if (amount <= 0 || IsDead()) return 0;
 
+        int previousHealth = currentHealth;
         currentHealth = Mathf.Max(0, currentHealth - amount);
         Debug.Log("[HP] Enemy " + name + ": " + currentHealth + "/" + maxHealth);
+        return previousHealth - currentHealth;
     }
 
-    public void Heal(int amount)
-    {
-        if (amount <= 0) return;
-
-        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
-        Debug.Log("[HP] Enemy " + name + ": " + currentHealth + "/" + maxHealth);
-    }
+    public bool IsDead() => currentHealth <= 0;
 
     [ContextMenu("DEBUG: Take 20 Damage")]
     private void DebugTakeDamage()
     {
         if (Application.isPlaying) TakeDamage(20);
-    }
-
-    [ContextMenu("DEBUG: Heal 20 HP")]
-    private void DebugHeal()
-    {
-        if (Application.isPlaying) Heal(20);
     }
 }

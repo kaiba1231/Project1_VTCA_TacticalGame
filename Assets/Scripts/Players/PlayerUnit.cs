@@ -10,14 +10,14 @@ public class PlayerUnit : MonoBehaviour
 
     private TurnManager turnManager;
     private UnitTurnComponent unitTurn;
-    private APComponent ap;
+    private APComponent apComponent;
 
     public int PlayerId => playerId;
-    public int MaxAP => ap.MaxAP;
-    public int CurrentAP => ap.CurrentAP;
+    public int MaxAP => apComponent.MaxAP;
+    public int CurrentAP => apComponent.CurrentAP;
     public bool IsActiveUnit => isActiveUnit;
     public bool HasEndedTurn => unitTurn.HasEndedTurn;
-    public bool CanAct => !HasEndedTurn && ap.CurrentAP > 0;
+    public bool CanAct => !HasEndedTurn && apComponent.CurrentAP > 0;
 
 
 
@@ -28,7 +28,7 @@ public class PlayerUnit : MonoBehaviour
     private void Awake()
     {
         unitTurn = GetComponent<UnitTurnComponent>();
-        ap = GetComponent<APComponent>();
+        apComponent = GetComponent<APComponent>();
     }
 
 
@@ -50,9 +50,9 @@ public class PlayerUnit : MonoBehaviour
 
     public void BeginTurn()
     {
-        ap.ResetAP();
+        apComponent.ResetAP();
         unitTurn.BeginTurn();
-        turnManager.Log("Player[" + playerId + "] START | AP: " + ap.CurrentAP);
+        turnManager.Log("Player[" + playerId + "] START | AP: " + apComponent.CurrentAP);
     }
 
     public void EndTurn()
@@ -60,20 +60,20 @@ public class PlayerUnit : MonoBehaviour
         if (HasEndedTurn || turnManager == null || !isActiveUnit) return;
 
         unitTurn.EndTurn();
-        turnManager.Log("Player[" + playerId + "] END TURN | AP left: " + ap.CurrentAP);
+        turnManager.Log("Player[" + playerId + "] END TURN | AP left: " + apComponent.CurrentAP);
         turnManager.OnPlayerEnded(this);
     }
 
     // De Move / Shoot su dung sau nay. Chua can goi o bai nay.
     public bool TrySpendAP(int amount = 1)
     {
-        if (amount <= 0 || !ap.HasEnoughAP(amount) || !CanAct || !isActiveUnit) return false;
+        if (amount <= 0 || !apComponent.HasEnoughAP(amount) || !CanAct || !isActiveUnit) return false;
         if (turnManager == null || turnManager.CurrentPhase != BattlePhase.PlayerTurn) return false;
 
-        if (!ap.TrySpendAP(amount)) return false;
-        turnManager.Log("Player[" + playerId + "] spent " + amount + " AP | AP remaining: " + ap.CurrentAP);
+        if (!apComponent.TrySpendAP(amount)) return false;
+        turnManager.Log("Player[" + playerId + "] spent " + amount + " AP | AP remaining: " + apComponent.CurrentAP);
 
-        if (ap.CurrentAP == 0) EndTurn();
+        if (apComponent.CurrentAP == 0) EndTurn();
         return true;
     }
 
@@ -91,3 +91,5 @@ public class PlayerUnit : MonoBehaviour
             TrySpendAP(1);
     }
 }
+
+
