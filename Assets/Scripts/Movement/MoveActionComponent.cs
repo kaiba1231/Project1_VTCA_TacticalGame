@@ -11,12 +11,14 @@ public class MoveActionComponent : MonoBehaviour
     private NavMeshAgent agent;
     public bool IsMoving { get; private set; }
 
-    private void Start()
+    private void Awake()
     {
         player = GetComponent<PlayerUnit>();
         agent = GetComponent<NavMeshAgent>();
+    }
 
-        // Keep the 2D sprite upright on an XY NavMesh.
+    private void Start()
+    {
         agent.updateRotation = false;
         agent.updateUpAxis = false;
     }
@@ -39,45 +41,63 @@ public class MoveActionComponent : MonoBehaviour
         if (camera == null) return;
 
         Vector3 destination = camera.ScreenToWorldPoint(Input.mousePosition);
-        destination.z = 0f; // because 2d nen lock vector z axis = 0.
+        destination.z = 0f;
 
-        // Clicking a Player or obstacle is not a Move command.
+        if (IsBlocked(destination)) return;
+        TryMove(destination);
+    }
+
+    // Player va preview cung dung chung cach kiem tra vat can.
+    public bool IsBlocked(Vector3 destination)
+    {
         foreach (Collider2D hit in Physics2D.OverlapPointAll(destination))
         {
             if (hit.CompareTag("Player") || hit.CompareTag("Enemy") || hit.CompareTag("Wall"))
-                return;
+                return true;
         }
+        return false;
+    }
 
-        TryMove(destination);
+    // Tim duong va do chieu dai duong di. Ham nay chua di chuyen unit.
+    public bool CalculateMovePath(Vector3 destination, NavMeshPath path, out float distance)
+    {
+        distance = 0f;
+        if (IsMoving || !player.IsActiveUnit || !player.CanAct || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
+            return false;
+
+        NavMeshHit hit;
+        if (!NavMesh.SamplePosition(destination, out hit, 0.1f, agent.areaMask))
+            return false;
+
+        if (!agent.CalculatePath(hit.position, path) || path.status != NavMeshPathStatus.PathComplete)
+            return false;
+
+        Vector3[] corners = path.corners;
+        for (int i = 1; i < corners.Length; i++)
+            distance += Vector2.Distance(corners[i - 1], corners[i]);
+
+        return true;
+    }
+
+    public bool IsMoveDistanceValid(float distance)
+    {
+        return distance >= 0.1f && distance <= maxUnitMoveDistance;
     }
 
     public void TryMove(Vector3 destination)
     {
-        if (IsMoving || !player.IsActiveUnit || !player.CanAct || !agent.isOnNavMesh)
-            return;
+        NavMeshPath path = new NavMeshPath();
+        float distance;
+        if (!CalculateMovePath(destination, path, out distance)) return;
 
-        if (!NavMesh.SamplePosition(destination, out NavMeshHit hit, 0.1f, agent.areaMask)) // tim diem navmesh gan vi tri clclick
-            return;
-
-        NavMeshPath path = new NavMeshPath(); // tao moi navemesh path
-        if (!agent.CalculatePath(hit.position, path) || path.status != NavMeshPathStatus.PathComplete)  // deny đích không thể đến hoàn toàn.
-            return;
-
-        float distance = 0f;
-
-        for (int i = 1; i < path.corners.Length; i++) // tinh quang duong thuc te co the vong` qua wall va obstacle.
-            distance += Vector2.Distance(path.corners[i - 1], path.corners[i]);
-
-        if (distance < 0.1f || distance > maxUnitMoveDistance)
+        if (!IsMoveDistanceValid(distance))
         {
-            Debug.Log("[MOVE] Destination is too close or too far.");
             return;
         }
 
         if (agent.SetPath(path))
         {
             IsMoving = true;
-            Debug.Log("[MOVE] Player " + player.PlayerId + " started moving.");
         }
     }
 
