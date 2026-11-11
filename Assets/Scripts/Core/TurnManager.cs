@@ -114,6 +114,7 @@ public class TurnManager : MonoBehaviour
     // PlayerUnit goi khi nguoi choi click len Collider2D.
     public void SelectPlayer(PlayerUnit player)
     {
+        if (ActionDelay.IsWaiting) return;
         if (SelectedPlayer != null)  // Không cho đổi Player khi unit hiện tại đang di chuyển
         {
             MoveActionComponent unitMove = SelectedPlayer.GetComponent<MoveActionComponent>();
@@ -145,6 +146,7 @@ public class TurnManager : MonoBehaviour
     // Button UI chi can goi ham nay.
     public void EndSelectedPlayerTurn()
     {
+        if (ActionDelay.IsWaiting) return;
         if (CurrentPhase != BattlePhase.PlayerTurn || SelectedPlayer == null)
             return;
 
@@ -163,6 +165,22 @@ public class TurnManager : MonoBehaviour
     {
         if (CurrentPhase != BattlePhase.PlayerTurn) return;
 
+        if (ActionDelay.IsWaiting)
+        {
+            StartCoroutine(AdvanceAfterActionDelay());
+            return;
+        }
+        AdvanceAfterPlayerEnded();
+    }
+
+    private IEnumerator AdvanceAfterActionDelay()
+    {
+        while (ActionDelay.IsWaiting) yield return null;
+        if (CurrentPhase == BattlePhase.PlayerTurn) AdvanceAfterPlayerEnded();
+    }
+
+    private void AdvanceAfterPlayerEnded()
+    {
         // Chon Player con luot co ID nho nhat.
         // Neu khong con Player nao thi sang Enemy Turn.
         if (!SelectFirstAvailablePlayer())
@@ -199,6 +217,9 @@ public class TurnManager : MonoBehaviour
         // Hien tai chua co AI: chi cho tung Enemy lan luot nhan luot de test.
         foreach (EnemyUnit enemy in enemyUnits)
         {
+            if (enemy == null) continue;
+            EnemyHealthComponent health = enemy.GetComponent<EnemyHealthComponent>();
+            if (health != null && health.IsDead()) continue;
             CurrentEnemy = enemy;
             enemy.BeginTurn();
             Log("ACTIVE Enemy dang la [" + enemy.EnemyId + "] " + enemy.name);
@@ -209,6 +230,14 @@ public class TurnManager : MonoBehaviour
         }
 
         CurrentEnemy = null;
+        bool anyAlive = false;
+        foreach (EnemyUnit enemy in enemyUnits)
+        {
+            if (enemy == null) continue;
+            EnemyHealthComponent health = enemy.GetComponent<EnemyHealthComponent>();
+            if (health == null || !health.IsDead()) { anyAlive = true; break; }
+        }
+        if (!anyAlive) { Log("All enemies defeated."); yield break; }
         Log("All Enemies ended. Next round!");
         StartPlayerTurn();
     }

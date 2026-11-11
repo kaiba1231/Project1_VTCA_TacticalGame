@@ -34,7 +34,7 @@ public class PreviewPathComponent : MonoBehaviour
     private void Update()
     {
         // An ngay khi Player khong con duoc dieu khien.
-        if (!player.IsActiveUnit || !player.CanAct || moveComponent.IsMoving ||
+        if (ActionDelay.IsWaiting || !player.IsActiveUnit || !player.CanAct || moveComponent.IsMoving ||
             (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())) //  tránh việc bấm nút UI mà Player cũng nhận lệnh di chuyển.
         {
             line.positionCount = 0;

@@ -12,6 +12,7 @@ public class PlayerUnit : MonoBehaviour
     private UnitTurnComponent unitTurn;
     private APComponent apComponent;
 
+    public TurnManager TurnManager => turnManager;
     public int PlayerId => playerId;
     public int MaxAP => apComponent.MaxAP;
     public int CurrentAP => apComponent.CurrentAP;
@@ -64,19 +65,6 @@ public class PlayerUnit : MonoBehaviour
         turnManager.OnPlayerEnded(this);
     }
 
-    // De Move / Shoot su dung sau nay. Chua can goi o bai nay.
-    public bool TrySpendAP(int amount = 1)
-    {
-        if (amount <= 0 || !apComponent.HasEnoughAP(amount) || !CanAct || !isActiveUnit) return false;
-        if (turnManager == null || turnManager.CurrentPhase != BattlePhase.PlayerTurn) return false;
-
-        if (!apComponent.TrySpendAP(amount)) return false;
-        turnManager.Log("Player[" + playerId + "] spent " + amount + " AP | AP remaining: " + apComponent.CurrentAP);
-
-        if (apComponent.CurrentAP == 0) EndTurn();
-        return true;
-    }
-
     // Unity goi khi click vao Collider2D cua Player.
     private void OnMouseDown()
     {
@@ -84,12 +72,7 @@ public class PlayerUnit : MonoBehaviour
             turnManager.SelectPlayer(this);
     }
 
-    [ContextMenu("DEBUG: Spend 1 AP")]
-    private void DebugSpendAP()
-    {
-        if (Application.isPlaying)
-            TrySpendAP(1);
-    }
+
 }
 
 

@@ -11,6 +11,11 @@ public class AttackActionComponent : MonoBehaviour
     [SerializeField] private int meleeDamage = 1; // Chua su dung trong v2.
     [SerializeField] private float meleeRange = 1f; // Chua su dung trong v2.
 
+    [Header("Ranged Weapon")]
+    [SerializeField] private Projectile2D projectilePrefab;
+    [SerializeField, Min(1)] private int baseDamage = 20;
+    [SerializeField, Min(1)] private int fireRate = 1;
+
     [Header("Arc Settings")]
     [SerializeField] private Sprite arcSprite;
     [SerializeField] private float arcRadius = 6f;
@@ -28,7 +33,7 @@ public class AttackActionComponent : MonoBehaviour
 
     public bool CanAttack()
     {
-        if (player == null || player.CurrentAP < attackAPCost || player.IsActiveUnit == false || player.CanAct == false)
+        if (player == null || ActionDelay.IsWaiting || player.CurrentAP < attackAPCost || player.IsActiveUnit == false || player.CanAct == false)
             return false;
 
         MoveActionComponent move = GetComponent<MoveActionComponent>();
@@ -64,6 +69,12 @@ public class AttackActionComponent : MonoBehaviour
         ArcAimController2D aim = gameObject.AddComponent<ArcAimController2D>();
         aim.Initialize(arcSprite, arcRadius, arcAngle, scanSpeed, arcScale);
         return true;
+    }
+
+    public bool ConfirmRangedAttack(Vector2 direction)
+    {
+        if (!CanAttack()) return false;
+        return WeaponController.TryFire(projectilePrefab, player, direction, baseDamage, fireRate, attackAPCost);
     }
 
     public int GetAttackAPCost()
