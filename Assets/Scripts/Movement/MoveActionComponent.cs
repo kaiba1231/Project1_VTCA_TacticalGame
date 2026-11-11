@@ -9,12 +9,14 @@ public class MoveActionComponent : MonoBehaviour
 
     private PlayerUnit player;
     private NavMeshAgent agent;
+    private APComponent apComponent;
     public bool IsMoving { get; private set; }
 
     private void Awake()
     {
         player = GetComponent<PlayerUnit>();
         agent = GetComponent<NavMeshAgent>();
+        apComponent = GetComponent<APComponent>();
     }
 
     private void Start()
@@ -31,7 +33,7 @@ public class MoveActionComponent : MonoBehaviour
             return;
         }
 
-        if (!player.IsActiveUnit || !player.CanAct || !Input.GetMouseButtonDown(0))
+        if (ActionDelay.IsWaiting || !player.IsActiveUnit || !player.CanAct || !Input.GetMouseButtonDown(0))
             return;
 
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
@@ -62,7 +64,7 @@ public class MoveActionComponent : MonoBehaviour
     public bool CalculateMovePath(Vector3 destination, NavMeshPath path, out float distance)
     {
         distance = 0f;
-        if (IsMoving || !player.IsActiveUnit || !player.CanAct || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
+        if (ActionDelay.IsWaiting || player.TurnManager == null || player.TurnManager.CurrentPhase != BattlePhase.PlayerTurn || player.TurnManager.SelectedPlayer != player || IsMoving || !player.IsActiveUnit || !player.CanAct || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
             return false;
 
         NavMeshHit hit;
@@ -118,7 +120,7 @@ public class MoveActionComponent : MonoBehaviour
 
         agent.ResetPath();
         IsMoving = false;
-        player.TrySpendAP(1);
-        Debug.Log("[MOVE]" + player.PlayerId + " arrived. -1 AP");
+        if (player.TurnManager != null && player.TurnManager.CurrentPhase == BattlePhase.PlayerTurn && player.TurnManager.SelectedPlayer == player && player.IsActiveUnit && player.CanAct && apComponent.TrySpendAP(1))
+            Debug.Log("[MOVE]" + player.PlayerId + " arrived. -1 AP");
     }
 }

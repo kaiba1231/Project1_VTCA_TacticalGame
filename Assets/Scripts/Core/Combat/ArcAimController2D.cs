@@ -103,7 +103,8 @@ public class ArcAimController2D : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-            player.TrySpendAP(1);
+            AttackActionComponent attack = GetComponent<AttackActionComponent>();
+            if (attack == null || !attack.ConfirmRangedAttack(CurrentScanDirection)) return;
 
             Debug.Log("[ARC] Player " + player.PlayerId + " aim direction: " + CurrentScanDirection);
             CancelAim();

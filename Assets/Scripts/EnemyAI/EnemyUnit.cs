@@ -12,6 +12,7 @@ public class EnemyUnit : MonoBehaviour
     private UnitTurnComponent unitTurn;
     private APComponent apComponent;
 
+    public TurnManager TurnManager => turnManager;
     public int EnemyId => enemyId;
     public int MaxAP => apComponent.MaxAP;
     public int CurrentAP => apComponent.CurrentAP;
@@ -54,18 +55,4 @@ public class EnemyUnit : MonoBehaviour
         turnManager.Log("Enemy[" + enemyId + "] END TURN");
     }
 
-    // Enemy AI se su dung sau nay. Hien tai Enemy dang duoc mo phong.
-    public bool TrySpendAP(int amount = 1)
-    {
-        if (amount <= 0 || HasEndedTurn || !apComponent.HasEnoughAP(amount)) return false;
-        if (turnManager == null || turnManager.CurrentEnemy != this) return false;
-
-        if (!apComponent.TrySpendAP(amount)) return false;
-        turnManager.Log("Enemy[" + enemyId + "] spent " + amount + " AP | Left: " + apComponent.CurrentAP);
-
-        if (apComponent.CurrentAP == 0)
-            EndTurn();
-
-        return true;
-    }
 }
