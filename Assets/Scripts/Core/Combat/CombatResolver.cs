@@ -4,11 +4,11 @@ public static class CombatResolver
     {
         if (enemy == null) return;
 
-        int actualDamage = ApplyEnemyDamage(enemy, damage);
-        if (actualDamage <= 0) return;
+        int popupDamage = ApplyEnemyDamage(enemy, damage);
+        if (popupDamage <= 0) return;
 
         DamagePopupUI popup = enemy.GetComponentInChildren<DamagePopupUI>(true);
-        if (popup != null) popup.Show(actualDamage);
+        if (popup != null) popup.Show(popupDamage);
     }
 
     public static int ApplyEnemyDamage(EnemyHealthComponent enemy, int damage)

@@ -7,19 +7,25 @@ public enum BattlePhase
 {
     Setup,
     PlayerTurn,
-    EnemyTurn
+    EnemyTurn,
+    BattleEnded
 }
 
 // Chi quan ly luot va thu tu ID. Khong quan ly UI, HP hay game over.
 public class TurnManager : MonoBehaviour
 {
     [Header("Units - Player theo thu tu ID 0, 1, 2...")]
-    [SerializeField] private List<PlayerUnit> playerUnits = new List<PlayerUnit>();
-    [SerializeField] private List<EnemyUnit> enemyUnits = new List<EnemyUnit>();
+    public List<PlayerUnit> playerUnits = new List<PlayerUnit>();
+    public List<EnemyUnit> enemyUnits = new List<EnemyUnit>();
+
+    [Header("Turn UI")]
+    [SerializeField] private TurnStatusUI turnStatusUI;
 
     [Header("Settings")]
     [SerializeField] private float enemyPreviewSeconds = 1f;
     [SerializeField] private bool showDebugLogs = true;
+
+
 
     public BattlePhase CurrentPhase { get; private set; } = BattlePhase.Setup;
     public int RoundNumber { get; private set; }
@@ -29,13 +35,6 @@ public class TurnManager : MonoBehaviour
     private void Start()
     {
         InitializeUnits();
-
-        if (playerUnits.Count == 0 || enemyUnits.Count == 0)
-        {
-            Debug.LogError("[TURN] Can it nhat 1 Player va 1 Enemy de test luot!", this);
-            return;
-        }
-
         StartPlayerTurn();
     }
 
@@ -100,13 +99,15 @@ public class TurnManager : MonoBehaviour
     {
         RoundNumber++;
         CurrentPhase = BattlePhase.PlayerTurn;
+        UpdateTurnUI();
         CurrentEnemy = null;
 
         Log("===== ROUND " + RoundNumber + " | PLAYER TURN =====");
 
         foreach (PlayerUnit player in playerUnits)
         {
-            player.BeginTurn();
+            if (player != null && !player.GetComponent<PlayerHealthComponent>().IsDead())
+                player.BeginTurn();
         }
         SelectFirstAvailablePlayer();
     }
@@ -191,7 +192,7 @@ public class TurnManager : MonoBehaviour
     {
         foreach (PlayerUnit player in playerUnits)
         {
-            if (player.CanAct)
+            if (player != null && player.CanAct)
             {
                 SetSelectedPlayer(player);
                 return true;
@@ -208,6 +209,7 @@ public class TurnManager : MonoBehaviour
     {
         SetSelectedPlayer(null);
         CurrentPhase = BattlePhase.EnemyTurn;
+        UpdateTurnUI();
         Log("===== ROUND " + RoundNumber + " | ENEMY TURN =====");
         StartCoroutine(PreviewEnemyTurns());
     }
@@ -230,16 +232,13 @@ public class TurnManager : MonoBehaviour
         }
 
         CurrentEnemy = null;
-        bool anyAlive = false;
-        foreach (EnemyUnit enemy in enemyUnits)
-        {
-            if (enemy == null) continue;
-            EnemyHealthComponent health = enemy.GetComponent<EnemyHealthComponent>();
-            if (health == null || !health.IsDead()) { anyAlive = true; break; }
-        }
-        if (!anyAlive) { Log("All enemies defeated."); yield break; }
         Log("All Enemies ended. Next round!");
         StartPlayerTurn();
+    }
+
+    public void UpdateTurnUI()
+    {
+        if (turnStatusUI != null) turnStatusUI.UpdateUI(RoundNumber, CurrentPhase);
     }
 
     public void Log(string message)

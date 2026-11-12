@@ -11,6 +11,7 @@ public class PlayerUnit : MonoBehaviour
     private TurnManager turnManager;
     private UnitTurnComponent unitTurn;
     private APComponent apComponent;
+    private PlayerHealthComponent health;
 
     public TurnManager TurnManager => turnManager;
     public int PlayerId => playerId;
@@ -18,7 +19,7 @@ public class PlayerUnit : MonoBehaviour
     public int CurrentAP => apComponent.CurrentAP;
     public bool IsActiveUnit => isActiveUnit;
     public bool HasEndedTurn => unitTurn.HasEndedTurn;
-    public bool CanAct => !HasEndedTurn && apComponent.CurrentAP > 0;
+    public bool CanAct => turnManager != null && turnManager.isActiveAndEnabled && health != null && !health.IsDead() && !HasEndedTurn && apComponent.CurrentAP > 0;
 
 
 
@@ -30,6 +31,7 @@ public class PlayerUnit : MonoBehaviour
     {
         unitTurn = GetComponent<UnitTurnComponent>();
         apComponent = GetComponent<APComponent>();
+        health = GetComponent<PlayerHealthComponent>();
     }
 
 
