@@ -25,16 +25,12 @@ public class APComponent : MonoBehaviour
         if (!HasEnoughAP(amount)) return false;
         currentAP -= amount;
         PlayerUnit player = GetComponent<PlayerUnit>();
-        EnemyUnit enemy = GetComponent<EnemyUnit>();
 
         if (player != null && player.TurnManager != null)
             player.TurnManager.Log("Player[" + player.PlayerId + "] spent " + amount + " AP | AP remaining: " + currentAP);
 
         if (currentAP == 0)
-        {
-            if (player != null) player.EndTurn();
-            else if (enemy != null) enemy.EndTurn();
-        }
+            GetComponent<UnitTurnComponent>().EndTurn();
         return true;
     }
 

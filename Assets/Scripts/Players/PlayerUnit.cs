@@ -22,9 +22,7 @@ public class PlayerUnit : MonoBehaviour
     public bool CanAct => turnManager != null && turnManager.isActiveAndEnabled && health != null && !health.IsDead() && !HasEndedTurn && apComponent.CurrentAP > 0;
 
 
-
     // ---------------------- Phuong thuc functions ------------------------ //
-
 
 
     private void Awake()
@@ -51,21 +49,6 @@ public class PlayerUnit : MonoBehaviour
 
     }
 
-    public void BeginTurn()
-    {
-        apComponent.ResetAP();
-        unitTurn.BeginTurn();
-        turnManager.Log("Player[" + playerId + "] START | AP: " + apComponent.CurrentAP);
-    }
-
-    public void EndTurn()
-    {
-        if (HasEndedTurn || turnManager == null || !isActiveUnit) return;
-
-        unitTurn.EndTurn();
-        turnManager.Log("Player[" + playerId + "] END TURN | AP left: " + apComponent.CurrentAP);
-        turnManager.OnPlayerEnded(this);
-    }
 
     // Unity goi khi click vao Collider2D cua Player.
     private void OnMouseDown()
@@ -76,5 +59,3 @@ public class PlayerUnit : MonoBehaviour
 
 
 }
-
-

@@ -19,9 +19,7 @@ public class EnemyUnit : MonoBehaviour
     public bool HasEndedTurn => unitTurn.HasEndedTurn;
 
 
-
     // ---------------------- Phuong thuc functions ------------------------ //
-
 
 
     private void Awake()
@@ -40,19 +38,5 @@ public class EnemyUnit : MonoBehaviour
         enemyId = id;
     }
 
-    public void BeginTurn()
-    {
-        apComponent.ResetAP();
-        unitTurn.BeginTurn();
-        turnManager.Log("Enemy[" + enemyId + "] START | AP: " + apComponent.CurrentAP);
-    }
-
-    public void EndTurn()
-    {
-        if (HasEndedTurn) return;
-
-        unitTurn.EndTurn();
-        turnManager.Log("Enemy[" + enemyId + "] END TURN");
-    }
 
 }

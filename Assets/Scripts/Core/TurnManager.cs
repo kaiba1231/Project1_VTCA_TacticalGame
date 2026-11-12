@@ -107,7 +107,7 @@ public class TurnManager : MonoBehaviour
         foreach (PlayerUnit player in playerUnits)
         {
             if (player != null && !player.GetComponent<PlayerHealthComponent>().IsDead())
-                player.BeginTurn();
+                player.GetComponent<UnitTurnComponent>().BeginTurn();
         }
         SelectFirstAvailablePlayer();
     }
@@ -158,10 +158,10 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
-        SelectedPlayer.EndTurn();
+        SelectedPlayer.GetComponent<UnitTurnComponent>().EndTurn();
     }
 
-    // Duoc goi khi Player bam End Turn hoac dung het AP.
+    // UnitTurnComponent goi khi Player bam End Turn hoac dung het AP.
     public void OnPlayerEnded(PlayerUnit player)
     {
         if (CurrentPhase != BattlePhase.PlayerTurn) return;
@@ -223,12 +223,13 @@ public class TurnManager : MonoBehaviour
             EnemyHealthComponent health = enemy.GetComponent<EnemyHealthComponent>();
             if (health != null && health.IsDead()) continue;
             CurrentEnemy = enemy;
-            enemy.BeginTurn();
+            UnitTurnComponent unitTurn = enemy.GetComponent<UnitTurnComponent>();
+            unitTurn.BeginTurn();
             Log("ACTIVE Enemy dang la [" + enemy.EnemyId + "] " + enemy.name);
 
             yield return new WaitForSeconds(Mathf.Max(0.1f, enemyPreviewSeconds));
 
-            enemy.EndTurn();
+            unitTurn.EndTurn();
         }
 
         CurrentEnemy = null;
