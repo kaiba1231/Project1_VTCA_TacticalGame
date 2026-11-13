@@ -148,7 +148,7 @@ public class TurnManager : MonoBehaviour
     public void EndSelectedPlayerTurn()
     {
         if (ActionDelay.IsWaiting) return;
-        if (CurrentPhase != BattlePhase.PlayerTurn || SelectedPlayer == null)
+        if (CurrentPhase != BattlePhase.PlayerTurn || SelectedPlayer == null || !SelectedPlayer.CanAct)
             return;
 
         MoveActionComponent unitMove = SelectedPlayer.GetComponent<MoveActionComponent>(); // bo sung de ngan khong cho end turn khi unit dang di chuyen

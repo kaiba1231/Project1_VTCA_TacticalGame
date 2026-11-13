@@ -50,6 +50,8 @@ public class AttackActionComponent : MonoBehaviour
 
     public bool TryRangedAttack()
     {
+        if (!player.CanAct) return false;
+
         ArcAimController2D currentAim = GetComponent<ArcAimController2D>();
         if (currentAim != null)
         {
