@@ -6,6 +6,10 @@ public class GameManager : MonoBehaviour
     public TurnManager turnManager;
     public GameObject gameOverPanel;
     public GameObject victoryPanel;
+    public PauseMenuUI pauseMenuUI;
+    public bool isPaused;
+
+    public string[] gameplaySceneNames = { "MAP_1" };
 
     public bool isVictory = false;
     public bool isDefeat = false;
@@ -17,11 +21,45 @@ public class GameManager : MonoBehaviour
     {
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         if (victoryPanel != null) victoryPanel.SetActive(false);
+        if (pauseMenuUI != null) pauseMenuUI.Show(false);
         if (turnManager != null) StartGame();
+    }
+
+    private void Update()
+    {
+        if (pauseMenuUI == null || IsGameOver || !Input.GetKeyDown(KeyCode.Escape)) return;
+
+        if (isPaused) ResumeGame();
+        else PauseGame();
+    }
+
+    public void PauseGame()
+    {
+        if (pauseMenuUI == null || IsGameOver) return;
+        isPaused = true;
+        Time.timeScale = 0f;
+        pauseMenuUI.Show(true);
+    }
+
+    public void ResumeGame()
+    {
+        if (IsGameOver) return;
+        isPaused = false;
+        Time.timeScale = 1f;
+        if (pauseMenuUI != null) pauseMenuUI.Show(false);
+    }
+
+    public void QuitToMenu()
+    {
+        isPaused = false;
+        Time.timeScale = 1f;
+        ActionDelay.Cancel();
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void StartGame()
     {
+        isPaused = false;
         Time.timeScale = 1f;
         if (turnManager == null)
         {
@@ -71,6 +109,30 @@ public class GameManager : MonoBehaviour
             if (victoryPanel != null) victoryPanel.SetActive(true);
             Debug.Log("[GAME] Victory!");
         }
+    }
+
+    public void NewGame()
+    {
+        LoadLevel(0);
+    }
+
+    public void LoadLevel(int levelIndex)
+    {
+        if (gameplaySceneNames == null || levelIndex < 0 || levelIndex >= gameplaySceneNames.Length)
+        {
+            Debug.LogWarning("[GAME] Level index is out of range.", this);
+            return;
+        }
+
+        isPaused = false;
+        Time.timeScale = 1f;
+        ActionDelay.Cancel();
+        SceneManager.LoadScene(gameplaySceneNames[levelIndex]);
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
     public void RestartGame()

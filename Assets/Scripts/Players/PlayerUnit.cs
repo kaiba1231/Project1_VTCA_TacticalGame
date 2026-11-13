@@ -19,7 +19,7 @@ public class PlayerUnit : MonoBehaviour
     public int CurrentAP => apComponent.CurrentAP;
     public bool IsActiveUnit => isActiveUnit;
     public bool HasEndedTurn => unitTurn.HasEndedTurn;
-    public bool CanAct => turnManager != null && turnManager.isActiveAndEnabled && health != null && !health.IsDead() && !HasEndedTurn && apComponent.CurrentAP > 0;
+    public bool CanAct => turnManager != null && turnManager.isActiveAndEnabled && health != null && health.GameManager != null && !health.GameManager.isPaused && !health.IsDead() && !HasEndedTurn && apComponent.CurrentAP > 0;
 
 
     // ---------------------- Phuong thuc functions ------------------------ //

@@ -27,6 +27,8 @@ public class MoveActionComponent : MonoBehaviour
 
     private void Update()
     {
+        if (Time.timeScale == 0f) return;
+
         if (IsMoving)
         {
             CheckArrival();
