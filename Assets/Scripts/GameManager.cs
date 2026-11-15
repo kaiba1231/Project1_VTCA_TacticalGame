@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour
     public void PauseGame()
     {
         if (pauseMenuUI == null || IsGameOver) return;
+        if (turnManager == null || turnManager.CurrentPhase != BattlePhase.PlayerTurn) return;
         isPaused = true;
         Time.timeScale = 0f;
         pauseMenuUI.Show(true);

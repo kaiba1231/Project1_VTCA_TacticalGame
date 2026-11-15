@@ -29,7 +29,13 @@ public class EnemyHealthComponent : MonoBehaviour
         if (amount <= 0 || IsDead()) return 0;
 
         currentHealth = Mathf.Max(0, currentHealth - amount);
-        if (IsDead()) gameManager.CheckBattleResult();
+        if (IsDead())
+        {
+            EnemyMoveActionComponent movement = GetComponent<EnemyMoveActionComponent>();
+            if (movement != null) movement.ReleasePosition();
+            gameManager.CheckBattleResult();
+            Destroy(gameObject);
+        }
         return amount;
     }
 }

@@ -32,6 +32,7 @@ public class PlayerHealthComponent : MonoBehaviour
         if (IsDead())
         {
             gameManager.CheckBattleResult();
+            Destroy(gameObject);
         }
     }
     public void Heal(int amount)
