@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
         int count = 0;
         foreach (PlayerUnit player in turnManager.playerUnits)
         {
-            if (player != null && !player.GetComponent<PlayerHealthComponent>().IsDead()) count++;
+            if (player != null && !player.GetComponent<HealthComponent>().IsDead()) count++;
         }
         return count;
     }
@@ -85,7 +85,7 @@ public class GameManager : MonoBehaviour
         int count = 0;
         foreach (EnemyUnit enemy in turnManager.enemyUnits)
         {
-            if (enemy != null && !enemy.GetComponent<EnemyHealthComponent>().IsDead()) count++;
+            if (enemy != null && !enemy.GetComponent<HealthComponent>().IsDead()) count++;
         }
         return count;
     }

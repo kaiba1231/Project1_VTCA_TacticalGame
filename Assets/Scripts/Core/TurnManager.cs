@@ -106,7 +106,7 @@ public class TurnManager : MonoBehaviour
 
         foreach (PlayerUnit player in playerUnits)
         {
-            if (player != null && !player.GetComponent<PlayerHealthComponent>().IsDead())
+            if (player != null && !player.GetComponent<HealthComponent>().IsDead())
                 player.GetComponent<UnitTurnComponent>().BeginTurn();
         }
         SelectFirstAvailablePlayer();
@@ -220,7 +220,7 @@ public class TurnManager : MonoBehaviour
         foreach (EnemyUnit enemy in enemyUnits)
         {
             if (enemy == null) continue;
-            EnemyHealthComponent health = enemy.GetComponent<EnemyHealthComponent>();
+            HealthComponent health = enemy.GetComponent<HealthComponent>();
             if (health != null && health.IsDead()) continue;
             
             CurrentEnemy = enemy;

@@ -11,7 +11,7 @@ public class PlayerUnit : MonoBehaviour
     private TurnManager turnManager;
     private UnitTurnComponent unitTurn;
     private APComponent apComponent;
-    private PlayerHealthComponent health;
+    private HealthComponent health;
 
     public TurnManager TurnManager => turnManager;
     public int PlayerId => playerId;
@@ -29,7 +29,7 @@ public class PlayerUnit : MonoBehaviour
     {
         unitTurn = GetComponent<UnitTurnComponent>();
         apComponent = GetComponent<APComponent>();
-        health = GetComponent<PlayerHealthComponent>();
+        health = GetComponent<HealthComponent>();
     }
 
 

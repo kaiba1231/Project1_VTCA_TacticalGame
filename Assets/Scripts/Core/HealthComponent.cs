@@ -1,35 +1,40 @@
 using UnityEngine;
 
-// De san cho Milestone Combat. Chua ket noi den TurnManager, khong co Health UI.
+[DisallowMultipleComponent]
 public class HealthComponent : MonoBehaviour
 {
-    [Header("Health")]
-    [SerializeField] private int maxHealth = 100;
+    [SerializeField] private GameManager gameManager;
+    [SerializeField] private bool isPlayer;
+    [SerializeField, Min(1)] private int maxHealth = 100;
     [SerializeField] private int currentHealth;
 
+    public GameManager GameManager => gameManager;
+    public bool IsPlayer => isPlayer;
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
+    public float HealthPercent => (float)currentHealth / maxHealth;
+    public bool IsDead() => currentHealth <= 0;
 
     private void Awake()
     {
         currentHealth = maxHealth;
     }
 
-    public void TakeDamage(int damage)
+    public int TakeDamage(int amount)
     {
-        if (damage <= 0) return;
-
-        currentHealth = Mathf.Max(0, currentHealth - damage);
-        Debug.Log("[HEALTH] " + name + " HP: " + currentHealth + "/" + maxHealth);
-
-        // Hien tai CHUA xu ly unit chet / Game Over.
+        if (amount <= 0 || IsDead()) return 0;
+        currentHealth = Mathf.Max(0, currentHealth - amount);
+        if (IsDead())
+        {
+            gameManager.CheckBattleResult();
+            Destroy(gameObject);
+        }
+        return amount;
     }
 
     public void Heal(int amount)
     {
-        if (amount <= 0) return;
-
+        if (!isPlayer || amount <= 0 || IsDead()) return;
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
-        Debug.Log("[HEALTH] " + name + " HP: " + currentHealth + "/" + maxHealth);
     }
 }

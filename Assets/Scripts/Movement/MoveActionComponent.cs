@@ -10,6 +10,7 @@ public class MoveActionComponent : MonoBehaviour
     private PlayerUnit player;
     private NavMeshAgent agent;
     private APComponent apComponent;
+    private bool waitingForDestinationPath;
     public bool IsMoving { get; private set; }
 
     private void Awake()
@@ -99,15 +100,42 @@ public class MoveActionComponent : MonoBehaviour
             return;
         }
 
-        if (agent.SetPath(path))
+        if (!agent.SetPath(path))
         {
-            IsMoving = true;
+            // Pause movement until the asynchronously calculated path is validated.
+            agent.isStopped = true;
+            Vector3 endpoint = path.corners[path.corners.Length - 1];
+            if (!agent.SetDestination(endpoint))
+            {
+                agent.isStopped = false;
+                return;
+            }
+            waitingForDestinationPath = true;
         }
+        IsMoving = true;
     }
 
     private void CheckArrival()
     {
         if (agent.pathPending) return;
+
+        if (waitingForDestinationPath)
+        {
+            waitingForDestinationPath = false;
+            Vector3[] corners = agent.path.corners;
+            float distance = 0f;
+            for (int i = 1; i < corners.Length; i++)
+                distance += Vector2.Distance(corners[i - 1], corners[i]);
+
+            if (!agent.hasPath || agent.pathStatus != NavMeshPathStatus.PathComplete || !IsMoveDistanceValid(distance))
+            {
+                agent.ResetPath();
+                agent.isStopped = false;
+                IsMoving = false;
+                return;
+            }
+            agent.isStopped = false;
+        }
 
         if (agent.pathStatus == NavMeshPathStatus.PathInvalid)
         {

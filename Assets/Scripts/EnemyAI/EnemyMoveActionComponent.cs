@@ -41,13 +41,13 @@ public class EnemyMoveActionComponent : MonoBehaviour
         foreach (var reservation in reservedPositions)
         {
             EnemyMoveActionComponent owner = reservation.Key;
-            if (owner == null || owner == this || !owner.isActiveAndEnabled || owner.GetComponent<EnemyHealthComponent>().IsDead()) continue;
+            if (owner == null || owner == this || !owner.isActiveAndEnabled || owner.GetComponent<HealthComponent>().IsDead()) continue;
             float spacing = agent.radius + owner.agent.radius + Mathf.Max(positionSpacing, owner.positionSpacing);
             if (Vector2.Distance(point, reservation.Value) < spacing) return false;
         }
         foreach (EnemyUnit other in enemy.TurnManager.enemyUnits)
         {
-            if (other == null || other == enemy || !other.gameObject.activeInHierarchy || other.GetComponent<EnemyHealthComponent>().IsDead()) continue;
+            if (other == null || other == enemy || !other.gameObject.activeInHierarchy || other.GetComponent<HealthComponent>().IsDead()) continue;
             NavMeshAgent otherAgent = other.GetComponent<NavMeshAgent>();
             if (otherAgent == null) continue;
             EnemyMoveActionComponent otherMove = other.GetComponent<EnemyMoveActionComponent>();
@@ -68,6 +68,8 @@ public class EnemyMoveActionComponent : MonoBehaviour
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private APComponent apComponent;
     public bool IsMoving { get; private set; }
+    public bool MoveFailed { get; private set; }
+    private bool waitingForDestinationPath;
 
     private void Awake()
     {
@@ -81,7 +83,7 @@ public class EnemyMoveActionComponent : MonoBehaviour
         float closest = float.MaxValue;
         foreach (PlayerUnit player in enemy.TurnManager.playerUnits)
         {
-            if (player == null || player.GetComponent<PlayerHealthComponent>().IsDead()) continue;
+            if (player == null || player.GetComponent<HealthComponent>().IsDead()) continue;
             float distance = Vector2.Distance(transform.position, player.transform.position);
             if (distance < closest) { closest = distance; nearest = player; }
         }
@@ -101,7 +103,7 @@ public class EnemyMoveActionComponent : MonoBehaviour
     public bool TryMoveTowardTarget(PlayerUnit target, float optimalDistance)
     {
         TurnManager turns = enemy.TurnManager;
-        if (target == null || target.GetComponent<PlayerHealthComponent>().IsDead() || turns == null || turns.CurrentPhase != BattlePhase.EnemyTurn || turns.CurrentEnemy != enemy || enemy.HasEndedTurn) return false;
+        if (target == null || target.GetComponent<HealthComponent>().IsDead() || turns == null || turns.CurrentPhase != BattlePhase.EnemyTurn || turns.CurrentEnemy != enemy || enemy.HasEndedTurn) return false;
         if (IsMoving || optimalDistance <= 0f || maxMoveDistance <= 0f || !apComponent.HasEnoughAP(moveAPCost) || !agent.isActiveAndEnabled || !agent.isOnNavMesh) return false;
 
         rayOrigin = target.transform.position;
@@ -169,7 +171,18 @@ public class EnemyMoveActionComponent : MonoBehaviour
         }
         if (Vector2.Distance(transform.position, destination) < 0.1f) return false;
         NavMeshPath movePath = new NavMeshPath();
-        if (!agent.CalculatePath(destination, movePath) || movePath.status != NavMeshPathStatus.PathComplete || !agent.SetPath(movePath)) return false;
+        if (!agent.CalculatePath(destination, movePath) || movePath.status != NavMeshPathStatus.PathComplete) return false;
+        if (!agent.SetPath(movePath))
+        {
+            agent.isStopped = true;
+            if (!agent.SetDestination(destination))
+            {
+                agent.isStopped = false;
+                return false;
+            }
+            waitingForDestinationPath = true;
+        }
+        MoveFailed = false;
         reservedPositions[this] = corners[corners.Length - 1];
         reservedTarget = target;
         IsMoving = true;
@@ -179,10 +192,30 @@ public class EnemyMoveActionComponent : MonoBehaviour
     private void Update()
     {
         if (!IsMoving || Time.timeScale == 0f || agent.pathPending) return;
+        if (waitingForDestinationPath)
+        {
+            waitingForDestinationPath = false;
+            Vector3[] corners = agent.path.corners;
+            float distance = 0f;
+            for (int i = 1; i < corners.Length; i++)
+                distance += Vector3.Distance(corners[i - 1], corners[i]);
+
+            if (!agent.hasPath || agent.pathStatus != NavMeshPathStatus.PathComplete || distance < 0.1f || distance > maxMoveDistance)
+            {
+                agent.ResetPath();
+                agent.isStopped = false;
+                IsMoving = false;
+                MoveFailed = true;
+                ReleasePosition();
+                return;
+            }
+            agent.isStopped = false;
+        }
         if (agent.pathStatus == NavMeshPathStatus.PathInvalid)
         {
             agent.ResetPath();
             IsMoving = false;
+            MoveFailed = true;
             ReleasePosition();
             return;
         }
