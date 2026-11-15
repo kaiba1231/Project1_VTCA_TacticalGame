@@ -229,6 +229,9 @@ GameObject:
   - component: {fileID: 50328582}
   - component: {fileID: 50328581}
   - component: {fileID: 180732724}
+  - component: {fileID: 1083782588}
+  - component: {fileID: 1083782587}
+  - component: {fileID: 1083782586}
   m_Layer: 0
   m_Name: Enemy_Boss
   m_TagString: Enemy
@@ -3648,6 +3651,9 @@ GameObject:
   - component: {fileID: 643088476}
   - component: {fileID: 643088475}
   - component: {fileID: 643088477}
+  - component: {fileID: 1952622231}
+  - component: {fileID: 1952622230}
+  - component: {fileID: 1952622229}
   m_Layer: 0
   m_Name: Enemy_Melee
   m_TagString: Enemy
@@ -5554,6 +5560,64 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1083782586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 50328578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abb4a5f4bc583c14e8c5beb843ab6071, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAIController
+  optimalAttackDistance: 10
+  blocker: {fileID: 1737457494}
+--- !u!114 &1083782587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 50328578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba5ff6392e95c34681b079fc731077d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveActionComponent
+  maxMoveDistance: 20
+  moveAPCost: 1
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 512
+  positionSpacing: 0.25
+  showRaycastGizmos: 1
+  enemy: {fileID: 50328581}
+  agent: {fileID: 1083782588}
+  apComponent: {fileID: 900000000000001}
+--- !u!195 &1083782588
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 50328578}
+  m_Enabled: 0
+  m_AgentTypeID: 0
+  m_Radius: 2
+  m_Speed: 10
+  m_Acceleration: 30
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0.1
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 10.24
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &1139705200
 GameObject:
   m_ObjectHideFlags: 0
@@ -7148,6 +7212,9 @@ GameObject:
   - component: {fileID: 1484520621}
   - component: {fileID: 1484520620}
   - component: {fileID: 910000000001057}
+  - component: {fileID: 910000000001060}
+  - component: {fileID: 910000000001059}
+  - component: {fileID: 910000000001058}
   m_Layer: 0
   m_Name: Enemy_Ranged
   m_TagString: Enemy
@@ -9344,6 +9411,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1930611399}
   m_CullTransparentMesh: 1
+--- !u!114 &1952622229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 643088473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abb4a5f4bc583c14e8c5beb843ab6071, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAIController
+  optimalAttackDistance: 5
+  blocker: {fileID: 826361726}
+--- !u!114 &1952622230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 643088473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba5ff6392e95c34681b079fc731077d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveActionComponent
+  maxMoveDistance: 20
+  moveAPCost: 1
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 512
+  positionSpacing: 0.25
+  showRaycastGizmos: 1
+  enemy: {fileID: 643088475}
+  agent: {fileID: 1952622231}
+  apComponent: {fileID: 900000000000003}
+--- !u!195 &1952622231
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 643088473}
+  m_Enabled: 0
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 10
+  m_Acceleration: 30
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0.1
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &1997661298
 GameObject:
   m_ObjectHideFlags: 0
@@ -11342,6 +11467,64 @@ PolygonCollider2D:
       - {x: 1.2870598, y: -2.0541573}
       - {x: 1.6587973, y: -0.6641293}
   m_UseDelaunayMesh: 1
+--- !u!114 &910000000001058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1484520618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abb4a5f4bc583c14e8c5beb843ab6071, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAIController
+  optimalAttackDistance: 15
+  blocker: {fileID: 1691362141}
+--- !u!114 &910000000001059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1484520618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba5ff6392e95c34681b079fc731077d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveActionComponent
+  maxMoveDistance: 20
+  moveAPCost: 1
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 512
+  positionSpacing: 0.25
+  showRaycastGizmos: 1
+  enemy: {fileID: 1484520620}
+  agent: {fileID: 910000000001060}
+  apComponent: {fileID: 900000000000006}
+--- !u!195 &910000000001060
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1484520618}
+  m_Enabled: 0
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 10
+  m_Acceleration: 30
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0.1
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!114 &920000000000001
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -222,14 +222,15 @@ public class TurnManager : MonoBehaviour
             if (enemy == null) continue;
             EnemyHealthComponent health = enemy.GetComponent<EnemyHealthComponent>();
             if (health != null && health.IsDead()) continue;
+            
             CurrentEnemy = enemy;
             UnitTurnComponent unitTurn = enemy.GetComponent<UnitTurnComponent>();
             unitTurn.BeginTurn();
             Log("ACTIVE Enemy dang la [" + enemy.EnemyId + "] " + enemy.name);
 
-            yield return new WaitForSeconds(Mathf.Max(0.1f, enemyPreviewSeconds));
-
-            unitTurn.EndTurn();
+            EnemyAIController ai = enemy.GetComponent<EnemyAIController>();
+            if (ai != null) yield return StartCoroutine(ai.TakeTurn());
+            else unitTurn.EndTurn();
         }
 
         CurrentEnemy = null;
