@@ -76,7 +76,7 @@ public class AttackActionComponent : MonoBehaviour
     public bool ConfirmRangedAttack(Vector2 direction)
     {
         if (!CanAttack()) return false;
-        return WeaponController.TryFire(projectilePrefab, player, direction, baseDamage, fireRate, attackAPCost);
+        return WeaponController.TryFire(projectilePrefab, player.gameObject, direction, baseDamage, fireRate, attackAPCost);
     }
 
     public int GetAttackAPCost()

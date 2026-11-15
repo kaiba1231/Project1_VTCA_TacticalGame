@@ -5,8 +5,12 @@ using UnityEngine.AI;
 [RequireComponent(typeof(EnemyUnit), typeof(EnemyMoveActionComponent))]
 public class EnemyAIController : MonoBehaviour
 {
-    [SerializeField] private float optimalAttackDistance = 8f;
+    [Header("Optimal Attack Distance")]
+    [SerializeField, Min(0.1f), InspectorName("Min Value")] private float minAttackDistance = 8f;
+    [SerializeField, Min(0.1f), InspectorName("Max Value")] private float maxAttackDistance = 14.4f;
+    private float optimalAttackDistance;
     [SerializeField] private NavMeshObstacle blocker;
+    [SerializeField] private EnemyAttackActionComponent attack;
     private NavMeshAgent agent;
     private EnemyMoveActionComponent movement;
     private UnitTurnComponent unitTurn;
@@ -20,6 +24,8 @@ public class EnemyAIController : MonoBehaviour
 
     public IEnumerator TakeTurn()
     {
+        float minimum = Mathf.Max(0.1f, minAttackDistance);
+        optimalAttackDistance = Random.Range(minimum, Mathf.Max(minimum, maxAttackDistance));
         blocker.enabled = false;
         yield return null;
         yield return null;
@@ -37,12 +43,17 @@ public class EnemyAIController : MonoBehaviour
             if (movement.HasClearAttackPosition(target, optimalAttackDistance))
             {
                 movement.ReserveCurrentPosition(target);
-                break;
+                if (attack == null || !attack.CanAttack()) break;
+                yield return attack.TryRangedAttack(target, optimalAttackDistance);
+                if (this == null) yield break;
+                if (!attack.ShotFired) break;
+                continue;
             }
 
             if (!movement.TryMoveTowardTarget(target, optimalAttackDistance)) break;
             while (movement != null && movement.IsMoving) yield return null;
             if (this == null) yield break;
+            if (movement.MoveFailed) break;
         }
 
         agent.enabled = false;
