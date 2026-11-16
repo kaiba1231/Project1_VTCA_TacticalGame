@@ -19,6 +19,8 @@ public class UnitTurnComponent : MonoBehaviour
         enemy = GetComponent<EnemyUnit>();
     }
 
+    public void RestoreTurnState(bool ended) => hasEndedTurn = ended;
+
     public void BeginTurn()
     {
         apComponent.ResetAP();
