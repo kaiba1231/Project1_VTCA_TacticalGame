@@ -9,6 +9,9 @@ public class APComponent : MonoBehaviour
     public int MaxAP => maxAP;
     public int CurrentAP => currentAP;
 
+    // Restore khong goi EndTurn.
+    public void RestoreAP(int value) => currentAP = Mathf.Clamp(value, 0, maxAP);
+
     public void ResetAP() => currentAP = maxAP;
 
     public bool HasEnoughAP(int amount)

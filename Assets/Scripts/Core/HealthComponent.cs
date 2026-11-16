@@ -20,6 +20,9 @@ public class HealthComponent : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    // Restore khong gay damage/death callback trong luc dung lai tran.
+    public void RestoreHealth(int value) => currentHealth = Mathf.Clamp(value, 0, maxHealth);
+
     public int TakeDamage(int amount)
     {
         if (amount <= 0 || IsDead()) return 0;
