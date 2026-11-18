@@ -67,7 +67,9 @@ public class EnemyMoveActionComponent : MonoBehaviour
     [SerializeField] private EnemyUnit enemy;
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private APComponent apComponent;
+    [SerializeField] private EnemyUnitAnimator unitAnimator;
     public bool IsMoving { get; private set; }
+    public bool IsFollowingPath => IsMoving && !waitingForDestinationPath;
     public bool MoveFailed { get; private set; }
     private bool waitingForDestinationPath;
 
@@ -182,11 +184,21 @@ public class EnemyMoveActionComponent : MonoBehaviour
             }
             waitingForDestinationPath = true;
         }
+        else
+        {
+            FacePathStart(movePath.corners);
+        }
         MoveFailed = false;
         reservedPositions[this] = corners[corners.Length - 1];
         reservedTarget = target;
         IsMoving = true;
         return true;
+    }
+
+    private void FacePathStart(Vector3[] corners)
+    {
+        if (unitAnimator != null && corners.Length > 1)
+            unitAnimator.FaceDirection(corners[1].x - corners[0].x);
     }
 
     private void Update()
@@ -209,6 +221,7 @@ public class EnemyMoveActionComponent : MonoBehaviour
                 ReleasePosition();
                 return;
             }
+            FacePathStart(corners);
             agent.isStopped = false;
         }
         if (agent.pathStatus == NavMeshPathStatus.PathInvalid)

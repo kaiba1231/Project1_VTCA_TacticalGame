@@ -117,7 +117,7 @@ public class GameManager : MonoBehaviour
         if (turnManager.SelectedPlayer == null || turnManager.SelectedPlayer.HasEndedTurn) return false;
         foreach (PlayerUnit player in turnManager.playerUnits)
         {
-            if (player != null && player.GetComponent<MoveActionComponent>().IsMoving) return false;
+            if (player != null && player.GetComponent<PlayerMoveActionComponent>().IsMoving) return false;
         }
         return true;
     }

@@ -11,6 +11,8 @@ public class EnemyAttackActionComponent : MonoBehaviour
 
     [Header("Weapon")]
     [SerializeField] private Projectile2D projectilePrefab;
+    [SerializeField] private bool useMeleeRaycast;
+    [SerializeField] private EnemyUnitAnimator unitAnimator;
     [SerializeField, Min(1)] private int baseDamage = 20;
     [SerializeField, Min(1)] private int fireRate = 1;
     [SerializeField, Min(1)] private int attackAPCost = 1;
@@ -20,7 +22,12 @@ public class EnemyAttackActionComponent : MonoBehaviour
     [SerializeField, Min(0f)] private float scanSpeed = 1f;
     [SerializeField] private Vector2 aimTimeRange = new Vector2(0.1f, 2f); 
 
-    public bool ShotFired { get; private set; }
+    public bool AttackPerformed { get; private set; }
+
+    private void Awake()
+    {
+        if (unitAnimator == null) unitAnimator = GetComponent<EnemyUnitAnimator>();
+    }
 
     public bool CanAttack()
     {
@@ -31,11 +38,12 @@ public class EnemyAttackActionComponent : MonoBehaviour
             && !movement.IsMoving && apComponent.HasEnoughAP(attackAPCost);
     }
 
-    public IEnumerator TryRangedAttack(PlayerUnit target, float attackDistance)
+    public IEnumerator TryAttack(PlayerUnit target, float attackDistance)
     {
-        ShotFired = false;
+        AttackPerformed = false;
         if (!CanAttack() || target == null) yield break;
-        if (!aim.StartAim(target, arcAngle, scanSpeed, aimTimeRange, attackDistance)) yield break;
+        float reach = useMeleeRaycast ? attackDistance + 2f : attackDistance;
+        if (!aim.StartAim(target, arcAngle, scanSpeed, aimTimeRange, reach)) yield break;
 
         while (aim != null && aim.IsAiming) yield return null;
         if (this == null || aim == null) yield break;
@@ -43,8 +51,36 @@ public class EnemyAttackActionComponent : MonoBehaviour
         aim.CancelAim();
         if (target == null || target.GetComponent<HealthComponent>().IsDead() || !CanAttack()) yield break;
 
-        ShotFired = WeaponController.TryFire(projectilePrefab, enemy.gameObject, direction, baseDamage, fireRate, attackAPCost);
+        AttackPerformed = useMeleeRaycast
+            ? TryMeleeAttack(direction, reach)
+            : WeaponController.TryFire(projectilePrefab, enemy.gameObject, direction, baseDamage, fireRate, attackAPCost);
+        if (AttackPerformed && !useMeleeRaycast && unitAnimator != null)
+            unitAnimator.FaceDirection(direction.x);
+
         // Wait even when spending the final AP has already ended this enemy's turn.
         while (ActionDelay.IsWaiting) yield return null;
+    }
+
+    private bool TryMeleeAttack(Vector2 direction, float reach)
+    {
+        if (!ActionDelay.TryStart(2f)) return false;
+        if (!apComponent.TrySpendAP(attackAPCost))
+        {
+            ActionDelay.Cancel();
+            return false;
+        }
+
+        if (unitAnimator != null) unitAnimator.PlayMeleeAttack(direction);
+        int layers = LayerMask.GetMask("Default", "Player", "Wall");
+        foreach (RaycastHit2D hit in Physics2D.RaycastAll(transform.position, direction, reach, layers))
+        {
+            if (hit.collider.CompareTag("Wall")) break;
+            HealthComponent target = hit.collider.GetComponentInParent<HealthComponent>();
+            if (target == null || !target.IsPlayer || target.IsDead()) continue;
+
+            CombatResolver.ApplyDamageAndShowPopup(target, baseDamage);
+            break;
+        }
+        return true;
     }
 }

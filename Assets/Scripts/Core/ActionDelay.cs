@@ -5,6 +5,7 @@ public static class ActionDelay
     private static float blockedUntil;
 
     public static bool IsWaiting => Time.time < blockedUntil;
+    public static float EndTime => blockedUntil;
 
     public static bool TryStart(float duration)
     {

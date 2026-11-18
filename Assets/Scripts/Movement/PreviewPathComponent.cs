@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
-[RequireComponent(typeof(PlayerUnit), typeof(MoveActionComponent))]
+[RequireComponent(typeof(PlayerUnit), typeof(PlayerMoveActionComponent))]
 public class PreviewPathComponent : MonoBehaviour
 {
     [SerializeField] private LineRenderer line;
@@ -10,14 +10,14 @@ public class PreviewPathComponent : MonoBehaviour
     [SerializeField] private Color tooFarColor = Color.red;
 
     private PlayerUnit player;
-    private MoveActionComponent moveComponent;
+    private PlayerMoveActionComponent moveComponent;
     private NavMeshPath path;
 
 
     private void Awake()
     {
         player = GetComponent<PlayerUnit>();
-        moveComponent = GetComponent<MoveActionComponent>();
+        moveComponent = GetComponent<PlayerMoveActionComponent>();
         path = new NavMeshPath();
 
         // Keo LineRenderer cua PathLine vao Inspector.

@@ -44,9 +44,9 @@ public class EnemyAIController : MonoBehaviour
             {
                 movement.ReserveCurrentPosition(target);
                 if (attack == null || !attack.CanAttack()) break;
-                yield return attack.TryRangedAttack(target, optimalAttackDistance);
+                yield return attack.TryAttack(target, optimalAttackDistance);
                 if (this == null) yield break;
-                if (!attack.ShotFired) break;
+                if (!attack.AttackPerformed) break;
                 continue;
             }
 
