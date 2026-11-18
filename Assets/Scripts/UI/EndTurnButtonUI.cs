@@ -50,7 +50,7 @@ public class EndTurnButtonUI : MonoBehaviour
             return;
         }
 
-        MoveActionComponent move = player.GetComponent<MoveActionComponent>();
+        PlayerMoveActionComponent move = player.GetComponent<PlayerMoveActionComponent>();
 
         endTurnButton.interactable = move == null || !move.IsMoving;
     }

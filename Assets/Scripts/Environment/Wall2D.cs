@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
-public class Obstacle2D : MonoBehaviour
+public class Wall2D : MonoBehaviour
 {
     private void Awake()
     {

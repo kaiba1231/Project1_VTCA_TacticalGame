@@ -116,7 +116,7 @@ public class TurnManager : MonoBehaviour
     private bool IsSelectedPlayerMoving()
     {
         if (SelectedPlayer == null) return false;
-        MoveActionComponent movement = SelectedPlayer.GetComponent<MoveActionComponent>();
+        PlayerMoveActionComponent movement = SelectedPlayer.GetComponent<PlayerMoveActionComponent>();
         return movement != null && movement.IsMoving;
     }
 

@@ -8,6 +8,8 @@ public class HealthComponent : MonoBehaviour
     [SerializeField, Min(1)] private int maxHealth = 100;
     [SerializeField] private int currentHealth;
 
+    private UnitHitFeedback hitFeedback;
+
     public GameManager GameManager => gameManager;
     public bool IsPlayer => isPlayer;
     public int MaxHealth => maxHealth;
@@ -18,6 +20,7 @@ public class HealthComponent : MonoBehaviour
     private void Awake()
     {
         currentHealth = maxHealth;
+        hitFeedback = GetComponent<UnitHitFeedback>();
     }
 
     // Restore khong gay damage/death callback trong luc dung lai tran.
@@ -31,6 +34,10 @@ public class HealthComponent : MonoBehaviour
         {
             gameManager.CheckBattleResult();
             Destroy(gameObject);
+        }
+        else if (hitFeedback != null)
+        {
+            hitFeedback.Play();
         }
         return amount;
     }

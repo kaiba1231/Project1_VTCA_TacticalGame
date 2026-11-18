@@ -7,6 +7,7 @@ TagManager:
   - Coin
   - Wall
   - Enemy
+  - Obstacle
   layers:
   - Default
   - TransparentFX
@@ -18,7 +19,7 @@ TagManager:
   - Enemy
   - Coin
   - Wall
-  - 
+  - Obstacle
   - 
   - 
   - 
@@ -43,6 +44,9 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Environment
+    uniqueID: 166612032
     locked: 0
   - name: Player
     uniqueID: 153032615

@@ -15,10 +15,10 @@ public class ShootButtonUI : MonoBehaviour
         PlayerUnit player = turnManager.SelectedPlayer;
         if (player == null || !player.CanAct) return;
 
-        AttackActionComponent attack = player.GetComponent<AttackActionComponent>();
+        PlayerAttackActionComponent attack = player.GetComponent<PlayerAttackActionComponent>();
         if (attack == null)
         {
-            Debug.LogWarning("[SHOOT] Player chua gan AttackActionComponent.", player);
+            Debug.LogWarning("[SHOOT] Player chua gan PlayerAttackActionComponent.", player);
             return;
         }
 
