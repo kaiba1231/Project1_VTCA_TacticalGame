@@ -17,6 +17,7 @@ public class TurnManager : MonoBehaviour
     public List<EnemyUnit> enemyUnits = new List<EnemyUnit>();
 
     [SerializeField] private TurnStatusUI turnStatusUI;
+    [SerializeField] private SaveLoadUI saveLoadUI;
     [SerializeField] private bool showDebugLogs = true;
 
     public BattlePhase CurrentPhase { get; private set; } = BattlePhase.Setup;
@@ -79,7 +80,7 @@ public class TurnManager : MonoBehaviour
             if (player != null && !player.GetComponent<HealthComponent>().IsDead())
                 player.GetComponent<UnitTurnComponent>().BeginTurn();
         }
-        SelectFirstAvailablePlayer();
+        if (SelectFirstAvailablePlayer() && saveLoadUI != null) saveLoadUI.AutoSave();
     }
 
     public void SelectPlayer(PlayerUnit player)

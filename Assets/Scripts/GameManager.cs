@@ -106,6 +106,7 @@ public class GameManager : MonoBehaviour
     {
         if (IsLoading || pauseMenuUI == null || IsGameOver || !Input.GetKeyDown(KeyCode.Escape)) return;
 
+        if (isPaused && saveLoadUI != null && saveLoadUI.HandleBack()) return;
         if (isPaused) ResumeGame();
         else PauseGame();
     }
