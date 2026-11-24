@@ -4,55 +4,245 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class SaveLoadUI : MonoBehaviour
 {
     [SerializeField] private SaveSystem saveSystem;
     [SerializeField] private GameManager gameManager;
-    [SerializeField] private UnityEngine.UI.Button saveButton;
-    [SerializeField] private UnityEngine.UI.Button loadButton;
-    [SerializeField] private UnityEngine.UI.Button continueButton;
+    [SerializeField] private Button saveButton;
+    [SerializeField] private Button loadButton;
+    [SerializeField] private Button continueButton;
     [SerializeField] private TMP_Text statusText;
 
     public string LastMessage { get; private set; }
     public string LastRestoreError { get; private set; }
-    private bool validSave;
-    private bool wasPaused;
+    [Header("Save slots")]
+    [SerializeField] private GameObject slotPanel;
+    [SerializeField] private TMP_Text slotTitle;
+    [SerializeField] private TMP_Text slotStatus;
+    [SerializeField] private Button[] slotButtons;
+    [SerializeField] private Button overwriteButton;
+    [SerializeField] private Button backButton;
+
+    private SaveSlotInfo[] slots;
+    private bool saving;
+    private bool busy;
+    private int overwriteSlot;
+    private SaveData pendingAutoSave;
+    private bool autoSaving;
 
     private void Start()
     {
-        RefreshSaveButtons();
+        if (slotPanel != null) slotPanel.SetActive(false);
         string notification = PersistentSaveData.Instance == null ? null : PersistentSaveData.Instance.TakeNotification();
         if (!string.IsNullOrEmpty(notification)) ShowMessage(notification);
     }
 
     private void Update()
     {
-        if (gameManager == null) return;
-        bool paused = gameManager.isPaused;
-        if (paused && !wasPaused) RefreshSaveButtons();
-        wasPaused = paused;
-        if (saveButton != null) saveButton.interactable = paused && gameManager.CanPauseGame();
-        if (loadButton != null) loadButton.interactable = validSave && !gameManager.IsLoading;
-        if (continueButton != null) continueButton.interactable = validSave && !gameManager.IsLoading;
-    }
-
-    public void RefreshSaveButtons()
-    {
-        SaveData data = null;
-        string message = "SaveSystem has not been assigned.";
-        validSave = saveSystem != null && saveSystem.LoadGame(out data, out message);
-        if (loadButton != null) loadButton.interactable = validSave;
-        if (continueButton != null) continueButton.interactable = validSave;
-        ShowMessage(validSave ? System.IO.Path.GetFileNameWithoutExtension(data.scenePath) + " | Round " + data.roundNumber : message);
+        bool ready = CanStartRequest();
+        if (saveButton != null) saveButton.interactable = ready && CanSaveManually();
+        if (loadButton != null) loadButton.interactable = ready && CanOpenLoadMenu();
+        if (continueButton != null) continueButton.interactable = ready;
     }
 
     public void SaveGame()
     {
-        if (saveSystem == null || gameManager == null || !gameManager.isPaused || !gameManager.CanPauseGame())
-        { ShowMessage("Open Pause during an idle Player Turn to save."); return; }
+        if (CanStartRequest() && CanSaveManually()) StartCoroutine(OpenSlots(true));
+    }
 
+    public void LoadGame()
+    {
+        if (CanStartRequest() && CanOpenLoadMenu()) StartCoroutine(OpenSlots(false));
+    }
+
+    public void ContinueGame()
+    {
+        if (CanStartRequest() && gameManager.turnManager == null)
+            StartCoroutine(LoadSlot(SaveSystem.AutoSlot));
+    }
+
+    private bool CanOpenLoadMenu()
+    {
+        return gameManager.turnManager == null || gameManager.isPaused;
+    }
+
+    private IEnumerator OpenSlots(bool saveMode)
+    {
+        if (slotPanel == null)
+        {
+            ShowMessage("Save slots panel is not assigned.");
+            yield break;
+        }
+
+        saving = saveMode;
+        slots = null;
+        overwriteSlot = 0;
+        busy = true;
+        slotPanel.SetActive(true);
+        slotTitle.text = saving ? "Save Game" : "Load Game";
+        slotStatus.text = "Checking save slots...";
+        RefreshSlotButtons();
+
+        string error = null;
+        yield return saveSystem.ListSlots((result, message) => { slots = result; error = message; });
+        busy = false;
+        slotStatus.text = error ?? (saving ? "Choose a slot to save your battle." : "Choose a saved battle.");
+        RefreshSlotButtons();
+    }
+
+    public void SelectSlot(int slotId)
+    {
+        if (busy || slots == null || slotId < 1 || slotId > SaveSystem.ManualSlotCount) return;
+        if (slotPanel == null || !slotPanel.activeSelf || overwriteSlot != 0) return;
+        SaveSlotInfo existing = FindSlot(slotId);
+        if (!saving)
+        {
+            if (existing != null) StartCoroutine(LoadSlot(slotId));
+            return;
+        }
+
+        if (!CanSaveManually()) return;
+        if (existing == null) StartCoroutine(SaveSlot(slotId));
+        else
+        {
+            overwriteSlot = slotId;
+            slotStatus.text = $"Replace the saved battle in Slot {slotId}?";
+            RefreshSlotButtons();
+        }
+    }
+
+    public void ConfirmOverwrite()
+    {
+        if (!busy && overwriteSlot != 0 && CanSaveManually()) StartCoroutine(SaveSlot(overwriteSlot));
+    }
+
+    public void CloseSlotPanel()
+    {
+        if (busy || slotPanel == null) return;
+        if (overwriteSlot != 0)
+        {
+            overwriteSlot = 0;
+            slotStatus.text = "Choose a slot to save your battle.";
+            RefreshSlotButtons();
+        }
+        else slotPanel.SetActive(false);
+    }
+
+    public bool HandleBack()
+    {
+        if (slotPanel == null || !slotPanel.activeSelf) return false;
+        CloseSlotPanel();
+        return true;
+    }
+
+    private IEnumerator SaveSlot(int slotId)
+    {
+        busy = true;
+        overwriteSlot = 0;
+        slotStatus.text = $"Saving to Slot {slotId}...";
+        RefreshSlotButtons();
+        string error = null;
+        yield return saveSystem.SaveGame(slotId, CaptureBattle(), message => error = message);
+        busy = false;
+        if (error != null)
+        {
+            slotStatus.text = error;
+            RefreshSlotButtons();
+            yield break;
+        }
+        slotPanel.SetActive(false);
+        ShowMessage($"Saved to Slot {slotId}.");
+    }
+
+    private IEnumerator LoadSlot(int slotId)
+    {
+        busy = true;
+        if (slotId == SaveSystem.AutoSlot) ShowMessage("Loading autosave...");
+        else
+        {
+            slotStatus.text = $"Loading Slot {slotId}...";
+            RefreshSlotButtons();
+        }
+
+        SaveData data = null;
+        string error = null;
+        yield return saveSystem.LoadGame(slotId, (result, message) => { data = result; error = message; });
+        if (error == null && gameManager.LoadSavedBattle(data)) yield break;
+
+        busy = false;
+        string messageText = error ?? "Could not start loading the saved battle.";
+        if (slotId == SaveSystem.AutoSlot) ShowMessage(messageText);
+        else
+        {
+            slotStatus.text = messageText;
+            RefreshSlotButtons();
+        }
+    }
+
+    public void AutoSave()
+    {
+        if (saveSystem == null || gameManager == null || gameManager.IsGameOver) return;
+        pendingAutoSave = CaptureBattle();
+        if (!autoSaving) StartCoroutine(WriteAutoSaves());
+    }
+
+    private IEnumerator WriteAutoSaves()
+    {
+        autoSaving = true;
+        while (pendingAutoSave != null)
+        {
+            SaveData data = pendingAutoSave;
+            pendingAutoSave = null;
+            yield return saveSystem.SaveGame(SaveSystem.AutoSlot, data, error =>
+            {
+                string message = error == null ? $"Autosaved round {data.roundNumber}." : $"Autosave failed: {error}";
+                Debug.Log("[Save] " + message, this);
+            });
+        }
+        autoSaving = false;
+    }
+
+    private bool CanStartRequest()
+    {
+        return !busy && (slotPanel == null || !slotPanel.activeSelf)
+            && saveSystem != null && gameManager != null && !gameManager.IsLoading;
+    }
+
+    private bool CanSaveManually()
+    {
+        return gameManager != null && gameManager.isPaused && gameManager.CanPauseGame();
+    }
+
+    private SaveSlotInfo FindSlot(int slotId)
+    {
+        return slots == null ? null : System.Array.Find(slots, slot => slot != null && slot.slotId == slotId);
+    }
+
+    private void RefreshSlotButtons()
+    {
+        for (int i = 0; i < slotButtons.Length; i++)
+        {
+            int slotId = i + 1;
+            SaveSlotInfo info = FindSlot(slotId);
+            string details = slots == null ? "Unavailable" : "Empty";
+            if (info != null)
+            {
+                details = $"{System.IO.Path.GetFileNameWithoutExtension(info.scenePath)}  |  Round {info.roundNumber}";
+                if (System.DateTime.TryParse(info.savedAt, out var time)) details += $"  |  {time:dd/MM/yyyy HH:mm}";
+            }
+            slotButtons[i].GetComponentInChildren<TMP_Text>().text = $"SLOT {slotId}    •    {details}";
+            slotButtons[i].interactable = !busy && overwriteSlot == 0 && slots != null && (saving || info != null);
+        }
+        overwriteButton.gameObject.SetActive(overwriteSlot != 0);
+        backButton.interactable = !busy;
+    }
+
+
+    private SaveData CaptureBattle()
+    {
         var turns = gameManager.turnManager;
         var data = new SaveData { scenePath = SceneManager.GetActiveScene().path, roundNumber = turns.RoundNumber };
         foreach (PlayerUnit player in turns.playerUnits)
@@ -72,17 +262,7 @@ public class SaveLoadUI : MonoBehaviour
                 position = enemy.transform.position,
                 currentHealth = enemy.GetComponent<HealthComponent>().CurrentHealth });
         }
-        saveSystem.SaveGame(data, out string message);
-        RefreshSaveButtons();
-        ShowMessage(message);
-    }
-
-    public void LoadGame()
-    {
-        if (gameManager == null || saveSystem == null || gameManager.IsLoading) return;
-        if (!saveSystem.LoadGame(out SaveData data, out string message))
-        { RefreshSaveButtons(); ShowMessage(message); return; }
-        if (!gameManager.LoadSavedBattle(data)) ShowMessage("Could not start loading the saved battle.");
+        return data;
     }
 
     public void ShowMessage(string message)
