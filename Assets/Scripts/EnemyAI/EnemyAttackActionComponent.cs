@@ -55,7 +55,7 @@ public class EnemyAttackActionComponent : MonoBehaviour
             ? TryMeleeAttack(direction, reach)
             : WeaponController.TryFire(projectilePrefab, enemy.gameObject, direction, baseDamage, fireRate, attackAPCost);
         if (AttackPerformed && !useMeleeRaycast && unitAnimator != null)
-            unitAnimator.FaceDirection(direction.x);
+            unitAnimator.PlayShoot(direction);
 
         // Wait even when spending the final AP has already ended this enemy's turn.
         while (ActionDelay.IsWaiting) yield return null;

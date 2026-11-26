@@ -5,9 +5,11 @@ using UnityEngine;
 public class DamagePopupUI : MonoBehaviour
 {
     [SerializeField] private TMP_Text popupText;
+    [SerializeField] private TMP_Text blockText;
     private float displayDuration = 1f;
     private float riseSpeed = 5f;
     private float timeLeft;
+    private float blockHideTime;
     private Vector2 startPosition;
 
     private void Awake()
@@ -24,8 +26,18 @@ public class DamagePopupUI : MonoBehaviour
         popupText.gameObject.SetActive(true);
     }
 
+    public void ShowBlock()
+    {
+        if (blockText == null) return;
+        blockHideTime = Time.time + 0.2f;
+        blockText.gameObject.SetActive(true);
+    }
+
     private void Update()
     {
+        if (blockText != null && blockText.gameObject.activeSelf && Time.time >= blockHideTime)
+            blockText.gameObject.SetActive(false);
+
         if (popupText == null || !popupText.gameObject.activeSelf) return;
         popupText.rectTransform.position += Vector3.up * riseSpeed * Time.deltaTime;
         timeLeft -= Time.deltaTime;
