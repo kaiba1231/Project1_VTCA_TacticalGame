@@ -23,6 +23,11 @@ public class HealthComponent : MonoBehaviour
         hitFeedback = GetComponent<UnitHitFeedback>();
     }
 
+    public void SetGameManager(GameManager manager)
+    {
+        gameManager = manager;
+    }
+
     // Restore khong gay damage/death callback trong luc dung lai tran.
     public void RestoreHealth(int value) => currentHealth = Mathf.Clamp(value, 0, maxHealth);
 

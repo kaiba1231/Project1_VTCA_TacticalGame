@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
             FailRestore("SaveLoadUI has not been assigned.");
             yield break;
         }
-        if (!turnManager.InitializeBattle(out string error))
+        if (!turnManager.InitializeBattle(this, out string error))
         {
             FailRestore(error ?? "Invalid Player roster.");
             yield break;

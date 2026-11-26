@@ -25,7 +25,7 @@ public class TurnManager : MonoBehaviour
     public PlayerUnit SelectedPlayer { get; private set; }
     public EnemyUnit CurrentEnemy { get; private set; }
 
-    public bool InitializeBattle(out string error)
+    public bool InitializeBattle(GameManager gameManager, out string error)
     {
         error = null;
         if (playerUnits.Count == 0 || enemyUnits.Count == 0)
@@ -48,6 +48,7 @@ public class TurnManager : MonoBehaviour
         {
             playerUnits[i].SetPlayerId(i);
             playerUnits[i].SetTurnManager(this);
+            playerUnits[i].GetComponent<HealthComponent>().SetGameManager(gameManager);
             playerUnits[i].SetActiveUnit(false);
         }
         enemyUnits.Sort((a, b) => a.EnemyId.CompareTo(b.EnemyId));
