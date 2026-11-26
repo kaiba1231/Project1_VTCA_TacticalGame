@@ -228,13 +228,18 @@ public class SaveLoadUI : MonoBehaviour
             int slotId = i + 1;
             SaveSlotInfo info = FindSlot(slotId);
             string details = slots == null ? "Unavailable" : "Empty";
+            bool canLoadSlot = false;
             if (info != null)
             {
-                details = $"{System.IO.Path.GetFileNameWithoutExtension(info.scenePath)}  |  Round {info.roundNumber}";
+                string sceneName = System.IO.Path.GetFileNameWithoutExtension(info.scenePath);
+                int levelIndex = System.Array.IndexOf(gameManager.gameplaySceneNames, sceneName);
+                canLoadSlot = levelIndex >= 0;
+                string mapLabel = canLoadSlot ? $"MAP {levelIndex + 1}" : "Removed map";
+                details = $"{mapLabel}  |  Round {info.roundNumber}";
                 if (System.DateTime.TryParse(info.savedAt, out var time)) details += $"  |  {time:dd/MM/yyyy HH:mm}";
             }
             slotButtons[i].GetComponentInChildren<TMP_Text>().text = $"SLOT {slotId}    •    {details}";
-            slotButtons[i].interactable = !busy && overwriteSlot == 0 && slots != null && (saving || info != null);
+            slotButtons[i].interactable = !busy && overwriteSlot == 0 && slots != null && (saving || canLoadSlot);
         }
         overwriteButton.gameObject.SetActive(overwriteSlot != 0);
         backButton.interactable = !busy;

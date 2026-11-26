@@ -35,6 +35,11 @@ public class Projectile2D : MonoBehaviour
         if (other.CompareTag("Wall"))
         {
             hitCollided = true;
+            if (!firedByEnemy && owner != null)
+            {
+                DamagePopupUI popup = owner.GetComponentInChildren<DamagePopupUI>();
+                if (popup != null) popup.ShowBlock();
+            }
             Destroy(gameObject);
             return;
         }

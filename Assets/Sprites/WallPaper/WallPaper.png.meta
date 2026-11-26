@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 29781c0f432413542aa0e42e1651ee8c
+guid: 0751ef395e05ec1408425ef4b5c5e52a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7854991704692705420
-    second: Boss_Move_02_0
+      213: 6433584462500256484
+    second: WallPaper_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -42,16 +42,16 @@ TextureImporter:
     mipBias: 0
     wrapU: 1
     wrapV: 1
-    wrapW: 1
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
   spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 0
-  alignment: 9
-  spritePivot: {x: 0.5227849, y: 0.5029032}
-  spritePixelsToUnits: 122.46094
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -74,7 +74,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -128,13 +128,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Boss_Move_02_0
+      name: WallPaper_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1254
-        height: 1254
+        width: 1024
+        height: 570
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,8 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c8849df7659820d60800000000000000
-      internalID: 7854991704692705420
+      spriteID: 4eadcc76bfea84950800000000000000
+      internalID: 6433584462500256484
       vertices: []
       indices: 
       edges: []

@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     public PauseMenuUI pauseMenuUI;
     public bool isPaused;
 
-    public string[] gameplaySceneNames = { "MAP_1" };
+    public string[] gameplaySceneNames = { "MAP_1", "MAP_2" };
 
     public bool isVictory = false;
     public bool isDefeat = false;
@@ -208,6 +208,18 @@ public class GameManager : MonoBehaviour
     public void NewGame()
     {
         LoadLevel(0);
+    }
+
+    public void NextLevel()
+    {
+        if (!isVictory || IsLoading) return;
+
+        int current = System.Array.IndexOf(gameplaySceneNames, CurrentLevel);
+        if (current < 0) return;
+
+        int next = current + 1;
+        if (next < gameplaySceneNames.Length) LoadLevel(next);
+        else QuitToMenu();
     }
 
     public void LoadLevel(int levelIndex)
